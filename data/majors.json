@@ -1,0 +1,233 @@
+{
+  "majors": [
+    {
+      "id": "computer-science",
+      "name": "Computer Science",
+      "name_zh": "電腦科學",
+      "competition_level": "high",
+      "category": "STEM"
+    },
+    {
+      "id": "engineering",
+      "name": "Engineering",
+      "name_zh": "工程",
+      "competition_level": "high",
+      "category": "STEM"
+    },
+    {
+      "id": "electrical-engineering",
+      "name": "Electrical Engineering",
+      "name_zh": "電機工程",
+      "competition_level": "high",
+      "category": "STEM"
+    },
+    {
+      "id": "mechanical-engineering",
+      "name": "Mechanical Engineering",
+      "name_zh": "機械工程",
+      "competition_level": "high",
+      "category": "STEM"
+    },
+    {
+      "id": "biomedical-engineering",
+      "name": "Biomedical Engineering",
+      "name_zh": "生醫工程",
+      "competition_level": "high",
+      "category": "STEM"
+    },
+    {
+      "id": "mathematics",
+      "name": "Mathematics",
+      "name_zh": "數學",
+      "competition_level": "medium",
+      "category": "STEM"
+    },
+    {
+      "id": "physics",
+      "name": "Physics",
+      "name_zh": "物理",
+      "competition_level": "medium",
+      "category": "STEM"
+    },
+    {
+      "id": "chemistry",
+      "name": "Chemistry",
+      "name_zh": "化學",
+      "competition_level": "medium",
+      "category": "STEM"
+    },
+    {
+      "id": "biology",
+      "name": "Biology",
+      "name_zh": "生物",
+      "competition_level": "high",
+      "category": "STEM"
+    },
+    {
+      "id": "data-science",
+      "name": "Data Science",
+      "name_zh": "資料科學",
+      "competition_level": "high",
+      "category": "STEM"
+    },
+    {
+      "id": "economics",
+      "name": "Economics",
+      "name_zh": "經濟學",
+      "competition_level": "high",
+      "category": "Business"
+    },
+    {
+      "id": "business",
+      "name": "Business Administration",
+      "name_zh": "企業管理",
+      "competition_level": "high",
+      "category": "Business"
+    },
+    {
+      "id": "finance",
+      "name": "Finance",
+      "name_zh": "金融",
+      "competition_level": "high",
+      "category": "Business"
+    },
+    {
+      "id": "accounting",
+      "name": "Accounting",
+      "name_zh": "會計",
+      "competition_level": "medium",
+      "category": "Business"
+    },
+    {
+      "id": "marketing",
+      "name": "Marketing",
+      "name_zh": "行銷",
+      "competition_level": "medium",
+      "category": "Business"
+    },
+    {
+      "id": "psychology",
+      "name": "Psychology",
+      "name_zh": "心理學",
+      "competition_level": "medium",
+      "category": "Social Sciences"
+    },
+    {
+      "id": "political-science",
+      "name": "Political Science",
+      "name_zh": "政治學",
+      "competition_level": "medium",
+      "category": "Social Sciences"
+    },
+    {
+      "id": "international-relations",
+      "name": "International Relations",
+      "name_zh": "國際關係",
+      "competition_level": "high",
+      "category": "Social Sciences"
+    },
+    {
+      "id": "sociology",
+      "name": "Sociology",
+      "name_zh": "社會學",
+      "competition_level": "low",
+      "category": "Social Sciences"
+    },
+    {
+      "id": "communications",
+      "name": "Communications",
+      "name_zh": "傳播學",
+      "competition_level": "medium",
+      "category": "Arts & Humanities"
+    },
+    {
+      "id": "journalism",
+      "name": "Journalism",
+      "name_zh": "新聞學",
+      "competition_level": "medium",
+      "category": "Arts & Humanities"
+    },
+    {
+      "id": "english",
+      "name": "English",
+      "name_zh": "英語文學",
+      "competition_level": "low",
+      "category": "Arts & Humanities"
+    },
+    {
+      "id": "history",
+      "name": "History",
+      "name_zh": "歷史",
+      "competition_level": "low",
+      "category": "Arts & Humanities"
+    },
+    {
+      "id": "philosophy",
+      "name": "Philosophy",
+      "name_zh": "哲學",
+      "competition_level": "low",
+      "category": "Arts & Humanities"
+    },
+    {
+      "id": "art",
+      "name": "Art / Fine Arts",
+      "name_zh": "藝術",
+      "competition_level": "medium",
+      "category": "Arts & Humanities"
+    },
+    {
+      "id": "music",
+      "name": "Music",
+      "name_zh": "音樂",
+      "competition_level": "high",
+      "category": "Arts & Humanities"
+    },
+    {
+      "id": "film",
+      "name": "Film / Cinema Studies",
+      "name_zh": "電影",
+      "competition_level": "high",
+      "category": "Arts & Humanities"
+    },
+    {
+      "id": "architecture",
+      "name": "Architecture",
+      "name_zh": "建築",
+      "competition_level": "high",
+      "category": "Arts & Humanities"
+    },
+    {
+      "id": "nursing",
+      "name": "Nursing",
+      "name_zh": "護理",
+      "competition_level": "high",
+      "category": "Health"
+    },
+    {
+      "id": "public-health",
+      "name": "Public Health",
+      "name_zh": "公共衛生",
+      "competition_level": "medium",
+      "category": "Health"
+    },
+    {
+      "id": "pre-med",
+      "name": "Pre-Medicine",
+      "name_zh": "醫學預科",
+      "competition_level": "high",
+      "category": "Health"
+    },
+    {
+      "id": "undecided",
+      "name": "Undecided",
+      "name_zh": "未決定",
+      "competition_level": "medium",
+      "category": "Other"
+    }
+  ],
+  "metadata": {
+    "version": "1.0",
+    "last_updated": "2026-01-16",
+    "total_majors": 32
+  }
+}

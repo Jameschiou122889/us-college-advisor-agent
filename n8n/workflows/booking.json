@@ -1,0 +1,156 @@
+{
+  "name": "US College Advisor - Booking",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "預約升學顧問諮詢",
+        "formDescription": "感謝您對我們服務的興趣！請填寫以下資料，我們的顧問將盡快與您聯繫。",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "姓名",
+              "fieldType": "text",
+              "requiredField": true,
+              "placeholder": "請輸入您的姓名"
+            },
+            {
+              "fieldLabel": "聯絡電話或 LINE ID",
+              "fieldType": "text",
+              "requiredField": true,
+              "placeholder": "例如：0912-345-678 或 LINE ID"
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "requiredField": true,
+              "placeholder": "example@email.com"
+            },
+            {
+              "fieldLabel": "期望諮詢時間",
+              "fieldType": "dropdown",
+              "requiredField": false,
+              "fieldOptions": {
+                "values": [
+                  { "option": "weekday-morning|平日上午 (9:00-12:00)" },
+                  { "option": "weekday-afternoon|平日下午 (14:00-18:00)" },
+                  { "option": "weekday-evening|平日晚上 (19:00-21:00)" },
+                  { "option": "weekend-morning|週末上午 (9:00-12:00)" },
+                  { "option": "weekend-afternoon|週末下午 (14:00-18:00)" },
+                  { "option": "flexible|皆可，由顧問安排" }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "備註",
+              "fieldType": "textarea",
+              "requiredField": false,
+              "placeholder": "如有特別想詢問的問題，請在此說明"
+            }
+          ]
+        },
+        "responseMode": "lastNode",
+        "options": {
+          "buttonLabel": "送出預約"
+        }
+      },
+      "id": "booking-form",
+      "name": "預約表單",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [0, 0],
+      "webhookId": "college-advisor-booking"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// 資料驗證和預處理\nconst formData = $input.first().json;\n\nconst name = formData['姓名'] || '';\nconst contact = formData['聯絡電話或 LINE ID'] || '';\nconst email = formData['Email'] || '';\nconst preferredTimeRaw = formData['期望諮詢時間'] || 'flexible|皆可，由顧問安排';\nconst notes = formData['備註'] || '';\n\n// 驗證必填欄位\nif (!name.trim()) {\n  throw new Error('請填寫姓名');\n}\nif (!contact.trim()) {\n  throw new Error('請填寫聯絡電話或 LINE ID');\n}\nif (!email.trim()) {\n  throw new Error('請填寫 Email');\n}\n\n// 簡單 Email 格式驗證\nconst emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\nif (!emailRegex.test(email)) {\n  throw new Error('請輸入有效的 Email 格式');\n}\n\n// 解析期望時間\nconst preferredTime = preferredTimeRaw.split('|')[1] || preferredTimeRaw;\n\n// 建立預約資料\nconst bookingData = {\n  name: name.trim(),\n  contact: contact.trim(),\n  email: email.trim(),\n  preferredTime: preferredTime,\n  notes: notes.trim(),\n  submittedAt: new Date().toISOString()\n};\n\nreturn [{ json: { booking: bookingData } }];"
+      },
+      "id": "validate-booking",
+      "name": "驗證預約資料",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [220, 0]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const booking = $input.first().json.booking;\nconst submittedDate = new Date(booking.submittedAt);\nconst formattedDate = submittedDate.toLocaleString('zh-TW', {\n  year: 'numeric',\n  month: '2-digit',\n  day: '2-digit',\n  hour: '2-digit',\n  minute: '2-digit',\n  timeZone: 'Asia/Taipei'\n});\n\n// 建立 Email 內容\nconst subject = `[新預約] ${booking.name} - 美國升學諮詢`;\n\nconst htmlBody = `\n<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"UTF-8\">\n  <style>\n    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }\n    .container { max-width: 600px; margin: 0 auto; padding: 20px; }\n    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0; }\n    .content { background: #f9f9f9; padding: 20px; border: 1px solid #ddd; border-top: none; border-radius: 0 0 8px 8px; }\n    .field { margin-bottom: 15px; }\n    .label { font-weight: 600; color: #555; font-size: 14px; }\n    .value { margin-top: 5px; padding: 10px; background: white; border-radius: 4px; border: 1px solid #eee; }\n    .footer { margin-top: 20px; font-size: 12px; color: #888; text-align: center; }\n  </style>\n</head>\n<body>\n  <div class=\"container\">\n    <div class=\"header\">\n      <h2 style=\"margin: 0;\">新的諮詢預約</h2>\n      <p style=\"margin: 10px 0 0 0; opacity: 0.9;\">來自 AI 選校顧問系統</p>\n    </div>\n    <div class=\"content\">\n      <div class=\"field\">\n        <div class=\"label\">預約人姓名</div>\n        <div class=\"value\">${booking.name}</div>\n      </div>\n      <div class=\"field\">\n        <div class=\"label\">聯絡方式</div>\n        <div class=\"value\">${booking.contact}</div>\n      </div>\n      <div class=\"field\">\n        <div class=\"label\">Email</div>\n        <div class=\"value\"><a href=\"mailto:${booking.email}\">${booking.email}</a></div>\n      </div>\n      <div class=\"field\">\n        <div class=\"label\">期望諮詢時間</div>\n        <div class=\"value\">${booking.preferredTime}</div>\n      </div>\n      ${booking.notes ? `\n      <div class=\"field\">\n        <div class=\"label\">備註</div>\n        <div class=\"value\">${booking.notes}</div>\n      </div>\n      ` : ''}\n      <div class=\"field\">\n        <div class=\"label\">預約提交時間</div>\n        <div class=\"value\">${formattedDate}</div>\n      </div>\n    </div>\n    <div class=\"footer\">\n      此 Email 由 AI 選校顧問系統自動發送\n    </div>\n  </div>\n</body>\n</html>\n`;\n\nconst textBody = `\n[新預約] ${booking.name} - 美國升學諮詢\n\n預約人資訊:\n- 姓名: ${booking.name}\n- 電話/LINE: ${booking.contact}\n- Email: ${booking.email}\n- 期望時間: ${booking.preferredTime}\n${booking.notes ? `- 備註: ${booking.notes}` : ''}\n\n提交時間: ${formattedDate}\n\n---\n此預約來自 AI 選校顧問系統\n`;\n\nreturn [{\n  json: {\n    booking,\n    email: {\n      subject,\n      htmlBody,\n      textBody\n    }\n  }\n}];"
+      },
+      "id": "build-email",
+      "name": "建立 Email 內容",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 0]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "fromEmail": "noreply@example.com",
+        "toEmail": "counselor@example.com",
+        "subject": "={{ $json.email.subject }}",
+        "emailType": "html",
+        "html": "={{ $json.email.htmlBody }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "send-email",
+      "name": "發送通知 Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [660, 0],
+      "credentials": {
+        "smtp": {
+          "id": "SMTP_CREDENTIAL_ID",
+          "name": "SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const booking = $('建立 Email 內容').first().json.booking;\n\nconst html = `\n<!DOCTYPE html>\n<html lang=\"zh-TW\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>預約成功</title>\n  <style>\n    * { box-sizing: border-box; }\n    body { \n      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;\n      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n      margin: 0;\n      padding: 20px;\n      min-height: 100vh;\n      display: flex;\n      align-items: center;\n      justify-content: center;\n    }\n    .container {\n      max-width: 500px;\n      width: 100%;\n      background: white;\n      border-radius: 16px;\n      padding: 40px;\n      text-align: center;\n      box-shadow: 0 10px 40px rgba(0,0,0,0.2);\n    }\n    .checkmark {\n      width: 80px;\n      height: 80px;\n      background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);\n      border-radius: 50%;\n      display: flex;\n      align-items: center;\n      justify-content: center;\n      margin: 0 auto 25px;\n    }\n    .checkmark svg {\n      width: 40px;\n      height: 40px;\n      fill: white;\n    }\n    h1 {\n      color: #2c3e50;\n      font-size: 24px;\n      margin: 0 0 10px 0;\n    }\n    .subtitle {\n      color: #7f8c8d;\n      font-size: 16px;\n      margin: 0 0 30px 0;\n    }\n    .info-box {\n      background: #f8f9fa;\n      border-radius: 12px;\n      padding: 20px;\n      text-align: left;\n      margin-bottom: 25px;\n    }\n    .info-row {\n      display: flex;\n      justify-content: space-between;\n      padding: 8px 0;\n      border-bottom: 1px solid #eee;\n    }\n    .info-row:last-child {\n      border-bottom: none;\n    }\n    .info-label {\n      color: #95a5a6;\n      font-size: 14px;\n    }\n    .info-value {\n      color: #2c3e50;\n      font-weight: 500;\n      font-size: 14px;\n    }\n    .note {\n      background: #e8f4fd;\n      border-radius: 8px;\n      padding: 15px;\n      color: #2980b9;\n      font-size: 14px;\n      line-height: 1.5;\n    }\n    .back-link {\n      display: inline-block;\n      margin-top: 25px;\n      color: #667eea;\n      text-decoration: none;\n      font-size: 14px;\n    }\n    .back-link:hover {\n      text-decoration: underline;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"container\">\n    <div class=\"checkmark\">\n      <svg viewBox=\"0 0 24 24\">\n        <path d=\"M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z\"/>\n      </svg>\n    </div>\n    <h1>預約成功！</h1>\n    <p class=\"subtitle\">我們的顧問將於 1-2 個工作天內與您聯繫</p>\n    \n    <div class=\"info-box\">\n      <div class=\"info-row\">\n        <span class=\"info-label\">姓名</span>\n        <span class=\"info-value\">${booking.name}</span>\n      </div>\n      <div class=\"info-row\">\n        <span class=\"info-label\">聯絡方式</span>\n        <span class=\"info-value\">${booking.contact}</span>\n      </div>\n      <div class=\"info-row\">\n        <span class=\"info-label\">Email</span>\n        <span class=\"info-value\">${booking.email}</span>\n      </div>\n      <div class=\"info-row\">\n        <span class=\"info-label\">期望時間</span>\n        <span class=\"info-value\">${booking.preferredTime}</span>\n      </div>\n    </div>\n    \n    <div class=\"note\">\n      小提醒：若超過 2 個工作天未收到回覆，請檢查垃圾郵件資料夾，或直接來電洽詢。\n    </div>\n    \n    <a href=\"MAIN_FORM_URL_HERE\" class=\"back-link\">返回選校推薦</a>\n  </div>\n</body>\n</html>\n`;\n\nreturn [{ json: { html, formSubmittedText: html, booking } }];"
+      },
+      "id": "generate-confirmation",
+      "name": "產生確認頁",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [880, 0]
+    }
+  ],
+  "connections": {
+    "預約表單": {
+      "main": [
+        [{ "node": "驗證預約資料", "type": "main", "index": 0 }]
+      ]
+    },
+    "驗證預約資料": {
+      "main": [
+        [{ "node": "建立 Email 內容", "type": "main", "index": 0 }]
+      ]
+    },
+    "建立 Email 內容": {
+      "main": [
+        [{ "node": "發送通知 Email", "type": "main", "index": 0 }]
+      ]
+    },
+    "發送通知 Email": {
+      "main": [
+        [{ "node": "產生確認頁", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "instanceId": "college-advisor-booking-v1"
+  },
+  "pinData": {},
+  "versionId": "2",
+  "triggerCount": 0
+}

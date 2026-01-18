@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>美國大學選校推薦 | AI 顧問</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .subtitle {
+            color: #7f8c8d;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .required::after {
+            content: " *";
+            color: #e74c3c;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .hint {
+            color: #95a5a6;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+        button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        .loading.active {
+            display: block;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #ecf0f1;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .error {
+            background: #fee;
+            color: #c0392b;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        @media (max-width: 500px) {
+            .row { grid-template-columns: 1fr; }
+            .card { padding: 25px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>🎓 美國大學選校推薦</h1>
+            <p class="subtitle">填寫您的資料，AI 顧問為您分析最適合的大學</p>
+
+            <div class="error" id="error"></div>
+
+            <form id="advisorForm">
+                <div class="row">
+                    <div class="form-group">
+                        <label class="required">GPA (滿分 4.0)</label>
+                        <input type="number" id="gpa" step="0.01" min="0" max="4" required placeholder="例如：3.7">
+                    </div>
+                    <div class="form-group">
+                        <label class="required">目標科系</label>
+                        <select id="major" required>
+                            <option value="">請選擇...</option>
+                            <option value="computer-science">電腦科學 Computer Science</option>
+                            <option value="engineering">工程 Engineering</option>
+                            <option value="electrical-engineering">電機工程 Electrical Engineering</option>
+                            <option value="mechanical-engineering">機械工程 Mechanical Engineering</option>
+                            <option value="data-science">資料科學 Data Science</option>
+                            <option value="economics">經濟學 Economics</option>
+                            <option value="business">企業管理 Business</option>
+                            <option value="finance">金融 Finance</option>
+                            <option value="psychology">心理學 Psychology</option>
+                            <option value="biology">生物 Biology</option>
+                            <option value="pre-med">醫學預科 Pre-Medicine</option>
+                            <option value="undecided">未決定 Undecided</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="form-group">
+                        <label>SAT 分數</label>
+                        <input type="number" id="sat" min="400" max="1600" placeholder="例如：1450">
+                        <p class="hint">如未考可留空</p>
+                    </div>
+                    <div class="form-group">
+                        <label>TOEFL 分數</label>
+                        <input type="number" id="toefl" min="0" max="120" placeholder="例如：105">
+                        <p class="hint">如未考可留空</p>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="form-group">
+                        <label>地區偏好</label>
+                        <select id="region">
+                            <option value="all">不限地區</option>
+                            <option value="East">東岸 (紐約、波士頓等)</option>
+                            <option value="West">西岸 (加州等)</option>
+                            <option value="South">南部 (德州、佛州等)</option>
+                            <option value="Midwest">中西部 (芝加哥等)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>年學費預算 (美元)</label>
+                        <select id="budget">
+                            <option value="any">不限預算</option>
+                            <option value="under-40k">$40,000 以下</option>
+                            <option value="40k-55k">$40,000 - $55,000</option>
+                            <option value="55k-65k">$55,000 - $65,000</option>
+                            <option value="over-65k">$65,000 以上</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>課外活動或特殊經歷</label>
+                    <textarea id="activities" placeholder="例如：社團幹部、競賽獲獎、志工經驗等"></textarea>
+                </div>
+
+                <button type="submit" id="submitBtn">🔍 取得選校推薦</button>
+            </form>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>AI 正在分析您的資料，請稍候...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const WEBHOOK_URL = 'https://n8n-297809544822.us-west1.run.app/webhook/college-advisor';
+
+        document.getElementById('advisorForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const form = e.target;
+            const submitBtn = document.getElementById('submitBtn');
+            const loading = document.getElementById('loading');
+            const errorDiv = document.getElementById('error');
+
+            // Validate GPA
+            const gpa = parseFloat(document.getElementById('gpa').value);
+            if (gpa < 0 || gpa > 4.0) {
+                errorDiv.textContent = 'GPA 必須在 0 到 4.0 之間';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            errorDiv.style.display = 'none';
+            form.style.display = 'none';
+            loading.classList.add('active');
+
+            const data = {
+                gpa: gpa,
+                major: document.getElementById('major').value,
+                sat: document.getElementById('sat').value ? parseInt(document.getElementById('sat').value) : null,
+                toefl: document.getElementById('toefl').value ? parseInt(document.getElementById('toefl').value) : null,
+                region: document.getElementById('region').value,
+                budget: document.getElementById('budget').value,
+                activities: document.getElementById('activities').value
+            };
+
+            try {
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) throw new Error('請求失敗');
+
+                const html = await response.text();
+                document.open();
+                document.write(html);
+                document.close();
+            } catch (error) {
+                loading.classList.remove('active');
+                form.style.display = 'block';
+                errorDiv.textContent = '發生錯誤，請稍後再試';
+                errorDiv.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

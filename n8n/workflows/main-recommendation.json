@@ -1,0 +1,251 @@
+{
+  "name": "US College Advisor - Main Recommendation",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "美國大學選校推薦",
+        "formDescription": "請填寫您的資料，我們的 AI 顧問將為您推薦適合的美國大學",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "GPA (滿分 4.0)",
+              "fieldType": "number",
+              "requiredField": true,
+              "placeholder": "例如：3.7"
+            },
+            {
+              "fieldLabel": "目標科系",
+              "fieldType": "dropdown",
+              "requiredField": true,
+              "fieldOptions": {
+                "values": [
+                  { "option": "computer-science|電腦科學 Computer Science" },
+                  { "option": "engineering|工程 Engineering" },
+                  { "option": "electrical-engineering|電機工程 Electrical Engineering" },
+                  { "option": "mechanical-engineering|機械工程 Mechanical Engineering" },
+                  { "option": "biomedical-engineering|生醫工程 Biomedical Engineering" },
+                  { "option": "mathematics|數學 Mathematics" },
+                  { "option": "physics|物理 Physics" },
+                  { "option": "chemistry|化學 Chemistry" },
+                  { "option": "biology|生物 Biology" },
+                  { "option": "data-science|資料科學 Data Science" },
+                  { "option": "economics|經濟學 Economics" },
+                  { "option": "business|企業管理 Business" },
+                  { "option": "finance|金融 Finance" },
+                  { "option": "accounting|會計 Accounting" },
+                  { "option": "marketing|行銷 Marketing" },
+                  { "option": "psychology|心理學 Psychology" },
+                  { "option": "political-science|政治學 Political Science" },
+                  { "option": "international-relations|國際關係 International Relations" },
+                  { "option": "communications|傳播學 Communications" },
+                  { "option": "journalism|新聞學 Journalism" },
+                  { "option": "art|藝術 Art" },
+                  { "option": "music|音樂 Music" },
+                  { "option": "film|電影 Film" },
+                  { "option": "architecture|建築 Architecture" },
+                  { "option": "nursing|護理 Nursing" },
+                  { "option": "public-health|公共衛生 Public Health" },
+                  { "option": "pre-med|醫學預科 Pre-Medicine" },
+                  { "option": "undecided|未決定 Undecided" }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "SAT 分數（選填）",
+              "fieldType": "number",
+              "requiredField": false,
+              "placeholder": "例如：1450（如未考可留空）"
+            },
+            {
+              "fieldLabel": "TOEFL 分數（選填）",
+              "fieldType": "number",
+              "requiredField": false,
+              "placeholder": "例如：105"
+            },
+            {
+              "fieldLabel": "地區偏好",
+              "fieldType": "dropdown",
+              "requiredField": false,
+              "fieldOptions": {
+                "values": [
+                  { "option": "all|不限地區" },
+                  { "option": "East|東岸 (紐約、波士頓等)" },
+                  { "option": "West|西岸 (加州等)" },
+                  { "option": "South|南部 (德州、佛州等)" },
+                  { "option": "Midwest|中西部 (芝加哥等)" }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "年學費預算（美元）",
+              "fieldType": "dropdown",
+              "requiredField": false,
+              "fieldOptions": {
+                "values": [
+                  { "option": "any|不限預算" },
+                  { "option": "under-40k|$40,000 以下" },
+                  { "option": "40k-55k|$40,000 - $55,000" },
+                  { "option": "55k-65k|$55,000 - $65,000" },
+                  { "option": "over-65k|$65,000 以上皆可" }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "課外活動或特殊經歷（選填）",
+              "fieldType": "textarea",
+              "requiredField": false,
+              "placeholder": "例如：社團幹部、競賽獲獎、志工經驗等"
+            }
+          ]
+        },
+        "responseMode": "lastNode"
+      },
+      "id": "form-trigger",
+      "name": "學生資料表單",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [0, 0],
+      "webhookId": "college-advisor-form"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// 資料預處理和驗證\nconst formData = $input.first().json;\n\n// 解析下拉選單值\nconst majorRaw = formData['目標科系'] || '';\nconst majorId = majorRaw.split('|')[0];\n\nconst regionRaw = formData['地區偏好'] || 'all|不限地區';\nconst region = regionRaw.split('|')[0];\n\nconst budgetRaw = formData['年學費預算（美元）'] || 'any|不限預算';\nconst budget = budgetRaw.split('|')[0];\n\n// 建立學生資料物件\nconst studentData = {\n  gpa: parseFloat(formData['GPA (滿分 4.0)']) || 0,\n  sat: formData['SAT 分數（選填）'] ? parseInt(formData['SAT 分數（選填）']) : null,\n  toefl: formData['TOEFL 分數（選填）'] ? parseInt(formData['TOEFL 分數（選填）']) : null,\n  major: majorId,\n  region_preference: region === 'all' ? null : [region],\n  budget: budget,\n  activities: formData['課外活動或特殊經歷（選填）'] || ''\n};\n\n// GPA 驗證\nif (studentData.gpa < 0 || studentData.gpa > 4.0) {\n  throw new Error('GPA 必須在 0 到 4.0 之間');\n}\n\nreturn [{ json: { student: studentData } }];"
+      },
+      "id": "validate-data",
+      "name": "驗證與預處理",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [220, 0]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// 載入學校和科系資料\n// 注意：實際部署時需將資料放入 n8n 或使用外部 API\n\nconst schoolsData = $env.SCHOOLS_DATA ? JSON.parse($env.SCHOOLS_DATA) : null;\nconst majorsData = $env.MAJORS_DATA ? JSON.parse($env.MAJORS_DATA) : null;\n\n// 如果沒有環境變數，使用內建的精簡資料\nconst schools = schoolsData || {\n  \"schools\": [\n    {\"id\":\"princeton\",\"name\":\"Princeton University\",\"name_zh\":\"普林斯頓大學\",\"ranking\":1,\"acceptance_rate\":0.04,\"sat_25th\":1510,\"sat_75th\":1570,\"tuition\":59710,\"region\":\"East\",\"state\":\"NJ\",\"top_majors\":[\"Economics\",\"Computer Science\",\"Public Policy\"],\"international_rate\":0.12},\n    {\"id\":\"mit\",\"name\":\"Massachusetts Institute of Technology\",\"name_zh\":\"麻省理工學院\",\"ranking\":2,\"acceptance_rate\":0.04,\"sat_25th\":1520,\"sat_75th\":1580,\"tuition\":60156,\"region\":\"East\",\"state\":\"MA\",\"top_majors\":[\"Computer Science\",\"Engineering\",\"Mathematics\"],\"international_rate\":0.11},\n    {\"id\":\"harvard\",\"name\":\"Harvard University\",\"name_zh\":\"哈佛大學\",\"ranking\":3,\"acceptance_rate\":0.03,\"sat_25th\":1480,\"sat_75th\":1580,\"tuition\":59076,\"region\":\"East\",\"state\":\"MA\",\"top_majors\":[\"Economics\",\"Computer Science\",\"Political Science\"],\"international_rate\":0.13},\n    {\"id\":\"stanford\",\"name\":\"Stanford University\",\"name_zh\":\"史丹佛大學\",\"ranking\":4,\"acceptance_rate\":0.04,\"sat_25th\":1500,\"sat_75th\":1570,\"tuition\":62484,\"region\":\"West\",\"state\":\"CA\",\"top_majors\":[\"Computer Science\",\"Engineering\",\"Biology\"],\"international_rate\":0.12},\n    {\"id\":\"yale\",\"name\":\"Yale University\",\"name_zh\":\"耶魯大學\",\"ranking\":5,\"acceptance_rate\":0.05,\"sat_25th\":1470,\"sat_75th\":1560,\"tuition\":64700,\"region\":\"East\",\"state\":\"CT\",\"top_majors\":[\"Economics\",\"Political Science\",\"History\"],\"international_rate\":0.12},\n    {\"id\":\"upenn\",\"name\":\"University of Pennsylvania\",\"name_zh\":\"賓州大學\",\"ranking\":6,\"acceptance_rate\":0.06,\"sat_25th\":1500,\"sat_75th\":1570,\"tuition\":63452,\"region\":\"East\",\"state\":\"PA\",\"top_majors\":[\"Finance\",\"Nursing\",\"Economics\"],\"international_rate\":0.13},\n    {\"id\":\"caltech\",\"name\":\"California Institute of Technology\",\"name_zh\":\"加州理工學院\",\"ranking\":7,\"acceptance_rate\":0.03,\"sat_25th\":1530,\"sat_75th\":1580,\"tuition\":62067,\"region\":\"West\",\"state\":\"CA\",\"top_majors\":[\"Physics\",\"Computer Science\",\"Engineering\"],\"international_rate\":0.10},\n    {\"id\":\"duke\",\"name\":\"Duke University\",\"name_zh\":\"杜克大學\",\"ranking\":8,\"acceptance_rate\":0.06,\"sat_25th\":1470,\"sat_75th\":1570,\"tuition\":63054,\"region\":\"South\",\"state\":\"NC\",\"top_majors\":[\"Computer Science\",\"Economics\",\"Public Policy\"],\"international_rate\":0.11},\n    {\"id\":\"brown\",\"name\":\"Brown University\",\"name_zh\":\"布朗大學\",\"ranking\":9,\"acceptance_rate\":0.05,\"sat_25th\":1480,\"sat_75th\":1560,\"tuition\":65146,\"region\":\"East\",\"state\":\"RI\",\"top_majors\":[\"Computer Science\",\"Economics\",\"Biology\"],\"international_rate\":0.12},\n    {\"id\":\"johns-hopkins\",\"name\":\"Johns Hopkins University\",\"name_zh\":\"約翰霍普金斯大學\",\"ranking\":10,\"acceptance_rate\":0.07,\"sat_25th\":1500,\"sat_75th\":1560,\"tuition\":60480,\"region\":\"East\",\"state\":\"MD\",\"top_majors\":[\"Public Health\",\"Biomedical Engineering\",\"Neuroscience\"],\"international_rate\":0.11},\n    {\"id\":\"northwestern\",\"name\":\"Northwestern University\",\"name_zh\":\"西北大學\",\"ranking\":11,\"acceptance_rate\":0.07,\"sat_25th\":1460,\"sat_75th\":1550,\"tuition\":63468,\"region\":\"Midwest\",\"state\":\"IL\",\"top_majors\":[\"Economics\",\"Journalism\",\"Engineering\"],\"international_rate\":0.10},\n    {\"id\":\"columbia\",\"name\":\"Columbia University\",\"name_zh\":\"哥倫比亞大學\",\"ranking\":12,\"acceptance_rate\":0.04,\"sat_25th\":1480,\"sat_75th\":1560,\"tuition\":65524,\"region\":\"East\",\"state\":\"NY\",\"top_majors\":[\"Economics\",\"Computer Science\",\"Political Science\"],\"international_rate\":0.15},\n    {\"id\":\"cornell\",\"name\":\"Cornell University\",\"name_zh\":\"康乃爾大學\",\"ranking\":13,\"acceptance_rate\":0.08,\"sat_25th\":1450,\"sat_75th\":1540,\"tuition\":63200,\"region\":\"East\",\"state\":\"NY\",\"top_majors\":[\"Computer Science\",\"Biology\",\"Hotel Administration\"],\"international_rate\":0.11},\n    {\"id\":\"uchicago\",\"name\":\"University of Chicago\",\"name_zh\":\"芝加哥大學\",\"ranking\":14,\"acceptance_rate\":0.05,\"sat_25th\":1500,\"sat_75th\":1570,\"tuition\":64260,\"region\":\"Midwest\",\"state\":\"IL\",\"top_majors\":[\"Economics\",\"Mathematics\",\"Political Science\"],\"international_rate\":0.14},\n    {\"id\":\"berkeley\",\"name\":\"University of California, Berkeley\",\"name_zh\":\"加州大學柏克萊分校\",\"ranking\":15,\"acceptance_rate\":0.12,\"sat_25th\":1300,\"sat_75th\":1520,\"tuition\":44066,\"region\":\"West\",\"state\":\"CA\",\"top_majors\":[\"Computer Science\",\"Economics\",\"Engineering\"],\"international_rate\":0.14},\n    {\"id\":\"ucla\",\"name\":\"University of California, Los Angeles\",\"name_zh\":\"加州大學洛杉磯分校\",\"ranking\":16,\"acceptance_rate\":0.09,\"sat_25th\":1290,\"sat_75th\":1510,\"tuition\":44830,\"region\":\"West\",\"state\":\"CA\",\"top_majors\":[\"Biology\",\"Economics\",\"Psychology\"],\"international_rate\":0.13},\n    {\"id\":\"rice\",\"name\":\"Rice University\",\"name_zh\":\"萊斯大學\",\"ranking\":17,\"acceptance_rate\":0.08,\"sat_25th\":1490,\"sat_75th\":1560,\"tuition\":54960,\"region\":\"South\",\"state\":\"TX\",\"top_majors\":[\"Computer Science\",\"Economics\",\"Engineering\"],\"international_rate\":0.12},\n    {\"id\":\"dartmouth\",\"name\":\"Dartmouth College\",\"name_zh\":\"達特茅斯學院\",\"ranking\":18,\"acceptance_rate\":0.06,\"sat_25th\":1440,\"sat_75th\":1560,\"tuition\":62430,\"region\":\"East\",\"state\":\"NH\",\"top_majors\":[\"Economics\",\"Government\",\"Computer Science\"],\"international_rate\":0.09},\n    {\"id\":\"vanderbilt\",\"name\":\"Vanderbilt University\",\"name_zh\":\"乣德堡大學\",\"ranking\":19,\"acceptance_rate\":0.06,\"sat_25th\":1470,\"sat_75th\":1560,\"tuition\":60348,\"region\":\"South\",\"state\":\"TN\",\"top_majors\":[\"Economics\",\"Medicine\",\"Engineering\"],\"international_rate\":0.09},\n    {\"id\":\"notre-dame\",\"name\":\"University of Notre Dame\",\"name_zh\":\"聖母大學\",\"ranking\":20,\"acceptance_rate\":0.13,\"sat_25th\":1410,\"sat_75th\":1540,\"tuition\":60301,\"region\":\"Midwest\",\"state\":\"IN\",\"top_majors\":[\"Finance\",\"Economics\",\"Political Science\"],\"international_rate\":0.06},\n    {\"id\":\"umich\",\"name\":\"University of Michigan\",\"name_zh\":\"密西根大學\",\"ranking\":21,\"acceptance_rate\":0.18,\"sat_25th\":1350,\"sat_75th\":1530,\"tuition\":57273,\"region\":\"Midwest\",\"state\":\"MI\",\"top_majors\":[\"Business\",\"Computer Science\",\"Engineering\"],\"international_rate\":0.08},\n    {\"id\":\"georgetown\",\"name\":\"Georgetown University\",\"name_zh\":\"乔治城大學\",\"ranking\":22,\"acceptance_rate\":0.12,\"sat_25th\":1380,\"sat_75th\":1530,\"tuition\":62052,\"region\":\"East\",\"state\":\"DC\",\"top_majors\":[\"International Relations\",\"Finance\",\"Political Science\"],\"international_rate\":0.13},\n    {\"id\":\"unc\",\"name\":\"University of North Carolina at Chapel Hill\",\"name_zh\":\"北卡羅來納大學教堂山分校\",\"ranking\":23,\"acceptance_rate\":0.17,\"sat_25th\":1340,\"sat_75th\":1510,\"tuition\":39338,\"region\":\"South\",\"state\":\"NC\",\"top_majors\":[\"Biology\",\"Business\",\"Computer Science\"],\"international_rate\":0.06},\n    {\"id\":\"cmu\",\"name\":\"Carnegie Mellon University\",\"name_zh\":\"卡內基美隆大學\",\"ranking\":24,\"acceptance_rate\":0.11,\"sat_25th\":1480,\"sat_75th\":1560,\"tuition\":61344,\"region\":\"East\",\"state\":\"PA\",\"top_majors\":[\"Computer Science\",\"Engineering\",\"Business\"],\"international_rate\":0.22},\n    {\"id\":\"emory\",\"name\":\"Emory University\",\"name_zh\":\"埃默里大學\",\"ranking\":25,\"acceptance_rate\":0.11,\"sat_25th\":1400,\"sat_75th\":1530,\"tuition\":57948,\"region\":\"South\",\"state\":\"GA\",\"top_majors\":[\"Business\",\"Biology\",\"Nursing\"],\"international_rate\":0.15},\n    {\"id\":\"uva\",\"name\":\"University of Virginia\",\"name_zh\":\"維吉尼亞大學\",\"ranking\":26,\"acceptance_rate\":0.19,\"sat_25th\":1360,\"sat_75th\":1510,\"tuition\":56837,\"region\":\"South\",\"state\":\"VA\",\"top_majors\":[\"Economics\",\"Business\",\"Computer Science\"],\"international_rate\":0.07},\n    {\"id\":\"wustl\",\"name\":\"Washington University in St. Louis\",\"name_zh\":\"聖路易斯華盛頓大學\",\"ranking\":27,\"acceptance_rate\":0.11,\"sat_25th\":1480,\"sat_75th\":1560,\"tuition\":61750,\"region\":\"Midwest\",\"state\":\"MO\",\"top_majors\":[\"Business\",\"Biology\",\"Computer Science\"],\"international_rate\":0.10},\n    {\"id\":\"usc\",\"name\":\"University of Southern California\",\"name_zh\":\"南加州大學\",\"ranking\":28,\"acceptance_rate\":0.12,\"sat_25th\":1400,\"sat_75th\":1530,\"tuition\":64726,\"region\":\"West\",\"state\":\"CA\",\"top_majors\":[\"Business\",\"Film\",\"Engineering\"],\"international_rate\":0.15},\n    {\"id\":\"nyu\",\"name\":\"New York University\",\"name_zh\":\"紐約大學\",\"ranking\":29,\"acceptance_rate\":0.12,\"sat_25th\":1370,\"sat_75th\":1520,\"tuition\":58168,\"region\":\"East\",\"state\":\"NY\",\"top_majors\":[\"Business\",\"Film\",\"Economics\"],\"international_rate\":0.20},\n    {\"id\":\"ufl\",\"name\":\"University of Florida\",\"name_zh\":\"佛羅里達大學\",\"ranking\":30,\"acceptance_rate\":0.23,\"sat_25th\":1300,\"sat_75th\":1460,\"tuition\":28658,\"region\":\"South\",\"state\":\"FL\",\"top_majors\":[\"Business\",\"Engineering\",\"Biology\"],\"international_rate\":0.05},\n    {\"id\":\"tufts\",\"name\":\"Tufts University\",\"name_zh\":\"塔夫茨大學\",\"ranking\":31,\"acceptance_rate\":0.10,\"sat_25th\":1420,\"sat_75th\":1530,\"tuition\":65222,\"region\":\"East\",\"state\":\"MA\",\"top_majors\":[\"International Relations\",\"Biology\",\"Computer Science\"],\"international_rate\":0.12},\n    {\"id\":\"ucsd\",\"name\":\"University of California, San Diego\",\"name_zh\":\"加州大學聖地亞哥分校\",\"ranking\":32,\"acceptance_rate\":0.24,\"sat_25th\":1280,\"sat_75th\":1490,\"tuition\":44487,\"region\":\"West\",\"state\":\"CA\",\"top_majors\":[\"Biology\",\"Computer Science\",\"Economics\"],\"international_rate\":0.18},\n    {\"id\":\"boston-college\",\"name\":\"Boston College\",\"name_zh\":\"波士頓學院\",\"ranking\":33,\"acceptance_rate\":0.16,\"sat_25th\":1380,\"sat_75th\":1510,\"tuition\":62950,\"region\":\"East\",\"state\":\"MA\",\"top_majors\":[\"Finance\",\"Economics\",\"Biology\"],\"international_rate\":0.08},\n    {\"id\":\"rochester\",\"name\":\"University of Rochester\",\"name_zh\":\"羅徹斯特大學\",\"ranking\":34,\"acceptance_rate\":0.34,\"sat_25th\":1340,\"sat_75th\":1510,\"tuition\":61678,\"region\":\"East\",\"state\":\"NY\",\"top_majors\":[\"Music\",\"Engineering\",\"Biology\"],\"international_rate\":0.25},\n    {\"id\":\"uci\",\"name\":\"University of California, Irvine\",\"name_zh\":\"加州大學爾灣分校\",\"ranking\":35,\"acceptance_rate\":0.21,\"sat_25th\":1200,\"sat_75th\":1420,\"tuition\":43709,\"region\":\"West\",\"state\":\"CA\",\"top_majors\":[\"Computer Science\",\"Biology\",\"Business\"],\"international_rate\":0.17},\n    {\"id\":\"ucdavis\",\"name\":\"University of California, Davis\",\"name_zh\":\"加州大學戴維斯分校\",\"ranking\":36,\"acceptance_rate\":0.37,\"sat_25th\":1170,\"sat_75th\":1410,\"tuition\":44494,\"region\":\"West\",\"state\":\"CA\",\"top_majors\":[\"Biology\",\"Engineering\",\"Agriculture\"],\"international_rate\":0.15},\n    {\"id\":\"bu\",\"name\":\"Boston University\",\"name_zh\":\"波士頓大學\",\"ranking\":37,\"acceptance_rate\":0.14,\"sat_25th\":1340,\"sat_75th\":1500,\"tuition\":62360,\"region\":\"East\",\"state\":\"MA\",\"top_majors\":[\"Business\",\"Engineering\",\"Biology\"],\"international_rate\":0.22},\n    {\"id\":\"wisconsin\",\"name\":\"University of Wisconsin-Madison\",\"name_zh\":\"威斯康辛大學麥迪遜分校\",\"ranking\":38,\"acceptance_rate\":0.49,\"sat_25th\":1280,\"sat_75th\":1460,\"tuition\":39427,\"region\":\"Midwest\",\"state\":\"WI\",\"top_majors\":[\"Computer Science\",\"Economics\",\"Biology\"],\"international_rate\":0.10},\n    {\"id\":\"texas-austin\",\"name\":\"University of Texas at Austin\",\"name_zh\":\"德州大學奧斯汀分校\",\"ranking\":39,\"acceptance_rate\":0.29,\"sat_25th\":1230,\"sat_75th\":1480,\"tuition\":40582,\"region\":\"South\",\"state\":\"TX\",\"top_majors\":[\"Business\",\"Engineering\",\"Computer Science\"],\"international_rate\":0.08},\n    {\"id\":\"brandeis\",\"name\":\"Brandeis University\",\"name_zh\":\"布蘭戴斯大學\",\"ranking\":40,\"acceptance_rate\":0.33,\"sat_25th\":1310,\"sat_75th\":1490,\"tuition\":62874,\"region\":\"East\",\"state\":\"MA\",\"top_majors\":[\"Biology\",\"Economics\",\"Psychology\"],\"international_rate\":0.20},\n    {\"id\":\"georgia-tech\",\"name\":\"Georgia Institute of Technology\",\"name_zh\":\"喬治亞理工學院\",\"ranking\":41,\"acceptance_rate\":0.16,\"sat_25th\":1370,\"sat_75th\":1520,\"tuition\":32876,\"region\":\"South\",\"state\":\"GA\",\"top_majors\":[\"Computer Science\",\"Engineering\",\"Business\"],\"international_rate\":0.12},\n    {\"id\":\"william-mary\",\"name\":\"College of William & Mary\",\"name_zh\":\"威廉與瑪麗學院\",\"ranking\":42,\"acceptance_rate\":0.33,\"sat_25th\":1340,\"sat_75th\":1500,\"tuition\":47443,\"region\":\"South\",\"state\":\"VA\",\"top_majors\":[\"Government\",\"Business\",\"Psychology\"],\"international_rate\":0.06},\n    {\"id\":\"case-western\",\"name\":\"Case Western Reserve University\",\"name_zh\":\"乣斯西儲大學\",\"ranking\":43,\"acceptance_rate\":0.27,\"sat_25th\":1360,\"sat_75th\":1510,\"tuition\":58260,\"region\":\"Midwest\",\"state\":\"OH\",\"top_majors\":[\"Engineering\",\"Nursing\",\"Biology\"],\"international_rate\":0.18},\n    {\"id\":\"ucsb\",\"name\":\"University of California, Santa Barbara\",\"name_zh\":\"加州大學聖塔芭芭拉分校\",\"ranking\":44,\"acceptance_rate\":0.26,\"sat_25th\":1230,\"sat_75th\":1460,\"tuition\":44196,\"region\":\"West\",\"state\":\"CA\",\"top_majors\":[\"Economics\",\"Biology\",\"Communication\"],\"international_rate\":0.11},\n    {\"id\":\"northeastern\",\"name\":\"Northeastern University\",\"name_zh\":\"東北大學\",\"ranking\":45,\"acceptance_rate\":0.07,\"sat_25th\":1410,\"sat_75th\":1540,\"tuition\":60192,\"region\":\"East\",\"state\":\"MA\",\"top_majors\":[\"Business\",\"Engineering\",\"Computer Science\"],\"international_rate\":0.20},\n    {\"id\":\"tulane\",\"name\":\"Tulane University\",\"name_zh\":\"杜蘭大學\",\"ranking\":46,\"acceptance_rate\":0.11,\"sat_25th\":1330,\"sat_75th\":1480,\"tuition\":62844,\"region\":\"South\",\"state\":\"LA\",\"top_majors\":[\"Business\",\"Biology\",\"Public Health\"],\"international_rate\":0.06},\n    {\"id\":\"osu\",\"name\":\"Ohio State University\",\"name_zh\":\"俄亥俄州立大學\",\"ranking\":47,\"acceptance_rate\":0.53,\"sat_25th\":1240,\"sat_75th\":1430,\"tuition\":35019,\"region\":\"Midwest\",\"state\":\"OH\",\"top_majors\":[\"Business\",\"Engineering\",\"Psychology\"],\"international_rate\":0.10},\n    {\"id\":\"pepperdine\",\"name\":\"Pepperdine University\",\"name_zh\":\"乣柏戴恩大學\",\"ranking\":48,\"acceptance_rate\":0.31,\"sat_25th\":1260,\"sat_75th\":1430,\"tuition\":62192,\"region\":\"West\",\"state\":\"CA\",\"top_majors\":[\"Business\",\"Communication\",\"Psychology\"],\"international_rate\":0.09},\n    {\"id\":\"villanova\",\"name\":\"Villanova University\",\"name_zh\":\"維拉諾瓦大學\",\"ranking\":49,\"acceptance_rate\":0.23,\"sat_25th\":1340,\"sat_75th\":1480,\"tuition\":61740,\"region\":\"East\",\"state\":\"PA\",\"top_majors\":[\"Business\",\"Nursing\",\"Engineering\"],\"international_rate\":0.04},\n    {\"id\":\"uiuc\",\"name\":\"University of Illinois Urbana-Champaign\",\"name_zh\":\"伊利諾大學厄巴納-香檳分校\",\"ranking\":50,\"acceptance_rate\":0.45,\"sat_25th\":1270,\"sat_75th\":1470,\"tuition\":36068,\"region\":\"Midwest\",\"state\":\"IL\",\"top_majors\":[\"Computer Science\",\"Engineering\",\"Business\"],\"international_rate\":0.17}\n  ]\n};\n\nconst majors = majorsData || {\n  \"majors\": [\n    {\"id\":\"computer-science\",\"name\":\"Computer Science\",\"name_zh\":\"電腦科學\",\"competition_level\":\"high\"},\n    {\"id\":\"engineering\",\"name\":\"Engineering\",\"name_zh\":\"工程\",\"competition_level\":\"high\"},\n    {\"id\":\"electrical-engineering\",\"name\":\"Electrical Engineering\",\"name_zh\":\"電機工程\",\"competition_level\":\"high\"},\n    {\"id\":\"mechanical-engineering\",\"name\":\"Mechanical Engineering\",\"name_zh\":\"機械工程\",\"competition_level\":\"high\"},\n    {\"id\":\"biomedical-engineering\",\"name\":\"Biomedical Engineering\",\"name_zh\":\"生醫工程\",\"competition_level\":\"high\"},\n    {\"id\":\"mathematics\",\"name\":\"Mathematics\",\"name_zh\":\"數學\",\"competition_level\":\"medium\"},\n    {\"id\":\"physics\",\"name\":\"Physics\",\"name_zh\":\"物理\",\"competition_level\":\"medium\"},\n    {\"id\":\"chemistry\",\"name\":\"Chemistry\",\"name_zh\":\"化學\",\"competition_level\":\"medium\"},\n    {\"id\":\"biology\",\"name\":\"Biology\",\"name_zh\":\"生物\",\"competition_level\":\"high\"},\n    {\"id\":\"data-science\",\"name\":\"Data Science\",\"name_zh\":\"資料科學\",\"competition_level\":\"high\"},\n    {\"id\":\"economics\",\"name\":\"Economics\",\"name_zh\":\"經濟學\",\"competition_level\":\"high\"},\n    {\"id\":\"business\",\"name\":\"Business Administration\",\"name_zh\":\"企業管理\",\"competition_level\":\"high\"},\n    {\"id\":\"finance\",\"name\":\"Finance\",\"name_zh\":\"金融\",\"competition_level\":\"high\"},\n    {\"id\":\"accounting\",\"name\":\"Accounting\",\"name_zh\":\"會計\",\"competition_level\":\"medium\"},\n    {\"id\":\"marketing\",\"name\":\"Marketing\",\"name_zh\":\"行銷\",\"competition_level\":\"medium\"},\n    {\"id\":\"psychology\",\"name\":\"Psychology\",\"name_zh\":\"心理學\",\"competition_level\":\"medium\"},\n    {\"id\":\"political-science\",\"name\":\"Political Science\",\"name_zh\":\"政治學\",\"competition_level\":\"medium\"},\n    {\"id\":\"international-relations\",\"name\":\"International Relations\",\"name_zh\":\"國際關係\",\"competition_level\":\"high\"},\n    {\"id\":\"communications\",\"name\":\"Communications\",\"name_zh\":\"傳播學\",\"competition_level\":\"medium\"},\n    {\"id\":\"journalism\",\"name\":\"Journalism\",\"name_zh\":\"新聞學\",\"competition_level\":\"medium\"},\n    {\"id\":\"art\",\"name\":\"Art / Fine Arts\",\"name_zh\":\"藝術\",\"competition_level\":\"medium\"},\n    {\"id\":\"music\",\"name\":\"Music\",\"name_zh\":\"音樂\",\"competition_level\":\"high\"},\n    {\"id\":\"film\",\"name\":\"Film / Cinema Studies\",\"name_zh\":\"電影\",\"competition_level\":\"high\"},\n    {\"id\":\"architecture\",\"name\":\"Architecture\",\"name_zh\":\"建築\",\"competition_level\":\"high\"},\n    {\"id\":\"nursing\",\"name\":\"Nursing\",\"name_zh\":\"護理\",\"competition_level\":\"high\"},\n    {\"id\":\"public-health\",\"name\":\"Public Health\",\"name_zh\":\"公共衛生\",\"competition_level\":\"medium\"},\n    {\"id\":\"pre-med\",\"name\":\"Pre-Medicine\",\"name_zh\":\"醫學預科\",\"competition_level\":\"high\"},\n    {\"id\":\"undecided\",\"name\":\"Undecided\",\"name_zh\":\"未決定\",\"competition_level\":\"medium\"}\n  ]\n};\n\nconst studentData = $input.first().json.student;\n\nreturn [{\n  json: {\n    student: studentData,\n    schools: schools,\n    majors: majors\n  }\n}];"
+      },
+      "id": "load-data",
+      "name": "載入學校資料",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 0]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const data = $input.first().json;\nconst student = data.student;\nconst schools = data.schools;\nconst majors = data.majors;\n\n// 建立 prompt\nconst systemPrompt = `你是專業的美國升學顧問。請根據學生資料和學校資料庫，提供選校推薦。\n\n## 推薦邏輯\n- Reach (衝刺校): 錄取機率 < 30%，推薦 3-5 所\n- Match (適中校): 錄取機率 30-70%，推薦 5-7 所  \n- Safety (安全校): 錄取機率 > 70%，推薦 3-5 所\n\n## 評估因素\n1. GPA 與學校錄取標準比較 (權重 40%)\n2. SAT 分數與學校 25th-75th percentile 比較 (權重 35%)\n3. 學校整體錄取率 (權重 15%)\n4. 科系競爭度調整 (權重 10%)\n\n## 輸出格式（必須是有效 JSON）\n{\n  \"summary\": \"簡短評估學生整體競爭力（2-3句繁體中文）\",\n  \"reach\": [{\"school_id\": \"...\", \"name\": \"...\", \"name_zh\": \"...\", \"ranking\": N, \"probability\": \"low\", \"probability_text\": \"約 X-Y%\", \"tuition\": N, \"reason\": \"...\"}],\n  \"match\": [...],\n  \"safety\": [...],\n  \"advice\": [\"建議1\", \"建議2\", \"建議3\"]\n}\n\n注意：\n1. probability 只能是 \"low\", \"medium\", \"high\"\n2. 所有文字使用繁體中文\n3. 必須輸出有效 JSON，不要加其他說明文字`;\n\nconst userPrompt = `## 學生資料\n${JSON.stringify(student, null, 2)}\n\n## 學校資料庫（共 ${schools.schools.length} 所）\n${JSON.stringify(schools.schools, null, 2)}\n\n## 科系資料\n${JSON.stringify(majors.majors, null, 2)}\n\n請根據以上資料，為這位學生提供選校推薦。只輸出 JSON，不要其他文字。`;\n\nreturn [{\n  json: {\n    systemPrompt,\n    userPrompt,\n    student,\n    schools,\n    majors\n  }\n}];"
+      },
+      "id": "build-prompt",
+      "name": "建立 Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"claude-sonnet-4-20250514\",\n  \"max_tokens\": 4096,\n  \"system\": {{ JSON.stringify($json.systemPrompt) }},\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": {{ JSON.stringify($json.userPrompt) }}\n    }\n  ]\n}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "claude-api",
+      "name": "Claude API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [880, 0],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "CREDENTIAL_ID",
+          "name": "Anthropic API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const apiResponse = $input.first().json;\nconst prevData = $('建立 Prompt').first().json;\n\n// 解析 Claude 回應\nlet recommendation;\ntry {\n  const content = apiResponse.content[0].text;\n  // 嘗試找到 JSON 部分\n  const jsonMatch = content.match(/\\{[\\s\\S]*\\}/);\n  if (jsonMatch) {\n    recommendation = JSON.parse(jsonMatch[0]);\n  } else {\n    throw new Error('無法找到 JSON 回應');\n  }\n} catch (e) {\n  // 錯誤處理：建立預設回應\n  recommendation = {\n    summary: '抱歉，推薦系統暫時無法處理您的請求。請稍後再試。',\n    reach: [],\n    match: [],\n    safety: [],\n    advice: ['請確認您的資料填寫正確', '如有問題請聯繫顧問團隊']\n  };\n}\n\nreturn [{\n  json: {\n    recommendation,\n    student: prevData.student\n  }\n}];"
+      },
+      "id": "parse-response",
+      "name": "解析 AI 回應",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1100, 0]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const data = $input.first().json;\nconst rec = data.recommendation;\nconst student = data.student;\n\n// 建立學校卡片 HTML\nfunction createSchoolCard(school, category) {\n  const categoryColors = {\n    reach: '#e74c3c',\n    match: '#f39c12', \n    safety: '#27ae60'\n  };\n  const color = categoryColors[category] || '#3498db';\n  \n  return `\n    <div style=\"background: white; border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid ${color};\">\n      <div style=\"display: flex; justify-content: space-between; align-items: flex-start;\">\n        <div>\n          <h3 style=\"margin: 0 0 5px 0; color: #2c3e50; font-size: 18px;\">${school.name_zh}</h3>\n          <p style=\"margin: 0; color: #7f8c8d; font-size: 14px;\">${school.name}</p>\n        </div>\n        <div style=\"text-align: right;\">\n          <span style=\"background: ${color}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px;\">#${school.ranking}</span>\n        </div>\n      </div>\n      <div style=\"margin-top: 15px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;\">\n        <div>\n          <span style=\"color: #95a5a6; font-size: 12px;\">錄取機率</span>\n          <p style=\"margin: 2px 0 0 0; color: #2c3e50; font-weight: 600;\">${school.probability_text}</p>\n        </div>\n        <div>\n          <span style=\"color: #95a5a6; font-size: 12px;\">年學費</span>\n          <p style=\"margin: 2px 0 0 0; color: #2c3e50; font-weight: 600;\">$${school.tuition?.toLocaleString() || 'N/A'}</p>\n        </div>\n      </div>\n      <p style=\"margin: 15px 0 0 0; color: #34495e; font-size: 14px; line-height: 1.5;\">${school.reason}</p>\n    </div>\n  `;\n}\n\n// 建立分類區塊\nfunction createSection(title, schools, category, emoji) {\n  if (!schools || schools.length === 0) return '';\n  return `\n    <div style=\"margin-bottom: 30px;\">\n      <h2 style=\"color: #2c3e50; font-size: 22px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;\">\n        <span>${emoji}</span> ${title}\n        <span style=\"background: #ecf0f1; color: #7f8c8d; padding: 2px 10px; border-radius: 10px; font-size: 14px; font-weight: normal;\">${schools.length} 所</span>\n      </h2>\n      ${schools.map(s => createSchoolCard(s, category)).join('')}\n    </div>\n  `;\n}\n\n// 建立建議區塊\nfunction createAdviceSection(advice) {\n  if (!advice || advice.length === 0) return '';\n  return `\n    <div style=\"background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; padding: 25px; margin-bottom: 30px; color: white;\">\n      <h2 style=\"margin: 0 0 15px 0; font-size: 20px;\">顧問建議</h2>\n      <ul style=\"margin: 0; padding-left: 20px; line-height: 1.8;\">\n        ${advice.map(a => `<li>${a}</li>`).join('')}\n      </ul>\n    </div>\n  `;\n}\n\n// 主要 HTML\nconst html = `\n<!DOCTYPE html>\n<html lang=\"zh-TW\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>您的選校推薦結果</title>\n  <style>\n    * { box-sizing: border-box; }\n    body { \n      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;\n      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);\n      margin: 0;\n      padding: 20px;\n      min-height: 100vh;\n    }\n    .container {\n      max-width: 800px;\n      margin: 0 auto;\n    }\n    @media (max-width: 600px) {\n      body { padding: 10px; }\n      .container { padding: 0; }\n    }\n  </style>\n</head>\n<body>\n  <div class=\"container\">\n    <!-- Header -->\n    <div style=\"text-align: center; margin-bottom: 30px;\">\n      <h1 style=\"color: #2c3e50; font-size: 28px; margin-bottom: 10px;\">您的選校推薦</h1>\n      <p style=\"color: #7f8c8d; font-size: 16px; margin: 0;\">根據 GPA ${student.gpa}${student.sat ? ` / SAT ${student.sat}` : ''} 的條件分析</p>\n    </div>\n\n    <!-- Summary -->\n    <div style=\"background: white; border-radius: 12px; padding: 25px; margin-bottom: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);\">\n      <p style=\"margin: 0; color: #34495e; font-size: 16px; line-height: 1.6;\">${rec.summary || '系統正在為您分析中...'}</p>\n    </div>\n\n    <!-- Recommendations -->\n    ${createSection('衝刺校 Reach Schools', rec.reach, 'reach', '')}\n    ${createSection('適中校 Match Schools', rec.match, 'match', '')}\n    ${createSection('安全校 Safety Schools', rec.safety, 'safety', '')}\n\n    <!-- Advice -->\n    ${createAdviceSection(rec.advice)}\n\n    <!-- CTA -->\n    <div style=\"background: white; border-radius: 12px; padding: 30px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1);\">\n      <h2 style=\"color: #2c3e50; margin: 0 0 10px 0; font-size: 22px;\">想深入了解申請策略？</h2>\n      <p style=\"color: #7f8c8d; margin: 0 0 20px 0;\">預約免費諮詢，專業顧問為您量身規劃</p>\n      <a href=\"BOOKING_URL_HERE\" style=\"display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; padding: 15px 40px; border-radius: 30px; font-size: 16px; font-weight: 600; transition: transform 0.2s;\">\n        預約免費諮詢\n      </a>\n    </div>\n\n    <!-- Footer -->\n    <div style=\"text-align: center; margin-top: 30px; color: #95a5a6; font-size: 12px;\">\n      <p>此推薦僅供參考，實際錄取結果受多種因素影響</p>\n      <p>2026 US College Advisor | Powered by AI</p>\n    </div>\n  </div>\n</body>\n</html>\n`;\n\nreturn [{ json: { html, formSubmittedText: html } }];"
+      },
+      "id": "generate-html",
+      "name": "產生結果頁 HTML",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1320, 0]
+    }
+  ],
+  "connections": {
+    "學生資料表單": {
+      "main": [
+        [{ "node": "驗證與預處理", "type": "main", "index": 0 }]
+      ]
+    },
+    "驗證與預處理": {
+      "main": [
+        [{ "node": "載入學校資料", "type": "main", "index": 0 }]
+      ]
+    },
+    "載入學校資料": {
+      "main": [
+        [{ "node": "建立 Prompt", "type": "main", "index": 0 }]
+      ]
+    },
+    "建立 Prompt": {
+      "main": [
+        [{ "node": "Claude API", "type": "main", "index": 0 }]
+      ]
+    },
+    "Claude API": {
+      "main": [
+        [{ "node": "解析 AI 回應", "type": "main", "index": 0 }]
+      ]
+    },
+    "解析 AI 回應": {
+      "main": [
+        [{ "node": "產生結果頁 HTML", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "instanceId": "college-advisor-v1"
+  },
+  "pinData": {},
+  "versionId": "2",
+  "triggerCount": 0
+}
