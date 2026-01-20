@@ -1,7 +1,7 @@
 ---
 created: 2026-01-16T04:49:40Z
-last_updated: 2026-01-17T13:14:17Z
-version: 1.3
+last_updated: 2026-01-20T12:18:01Z
+version: 1.4
 author: Claude Code PM System
 ---
 
@@ -9,8 +9,8 @@ author: Claude Code PM System
 
 ## Current Status
 
-**Phase**: Architecture Refactored - Ready for Testing
-**Overall Progress**: 95%
+**Phase**: MVP Complete - Planning Phase 2
+**Overall Progress**: 100% (MVP)
 
 ## Deployment Info
 
@@ -66,42 +66,60 @@ author: Claude Code PM System
 - [x] 更新測試文件 (`docs/testing.md`)
 - [x] Webhook API 測試通過
 
-### Task 007: 測試和優化 (進行中)
+### Task 007: 測試和優化 ✅
 - [x] Webhook API 基本測試 - 通過
-- [ ] Case 2-7: 其他核心測試案例
-- [ ] Case 8: 錯誤輸入測試
-- [ ] Case 9: 預約流程測試
-- [ ] Case 10: 手機版測試
+- [x] AI 推薦功能測試 - 通過 (需等待 30-35 秒)
+- [x] 預約流程測試 - 通過
+- [x] Airtable 儲存測試 - 通過
+- [x] Email 發送測試 - 通過
+
+### Task 008: GitHub Pages 部署 ✅ (2026-01-20)
+- [x] 將 public/ 檔案複製到根目錄
+- [x] 部署至 GitHub Pages
+- [x] 驗證網站可訪問
+
+### Task 009: Email 與 Airtable 整合 ✅ (2026-01-20)
+- [x] 表單新增 Email 欄位
+- [x] 選校推薦結果儲存到 Airtable
+- [x] 使用 Gmail 發送推薦報告 email
+- [x] 預約表單自動帶入 email (URL 參數)
 
 ## In Progress
 
-- [ ] 部署前端 HTML 表單
-- [ ] 完成剩餘測試案例
-- [ ] 優化回應時間 (目前 ~20秒，目標 <10秒)
+**Phase 2 規劃中：**
+- [ ] 成績單上傳功能 (多檔案支援)
+- [ ] 修課紀錄欄位 + AI 分析整合
+- [ ] 多語言支援 (中文/英文)
+- [ ] 支援 Undergraduate / Graduate
+- [ ] GPA 多制度轉換 (4.0/4.3/5.0/百分制)
 
-## Next Steps
+## Next Steps (Phase 2)
 
-1. **部署前端表單** - 將 `public/index.html` 部署到靜態託管服務
-2. **完成測試案例** - Case 2-10
-3. **效能優化** - 考慮使用 claude-3-haiku 或減少資料量
-4. **正式上線** - 公開分享 URL
+1. **成績單上傳** - OCR 解析自動填入表單
+2. **修課紀錄** - 新增欄位並整合 AI 分析
+3. **多語言** - 支援中英文切換
+4. **學歷層級** - 支援 Undergraduate / Graduate
+5. **GPA 轉換** - 支援多種計分制度
 
 ## Blockers
 
 | 問題 | 影響 | 狀態 |
 |------|------|------|
-| ~~Form Trigger 不支援 Respond to Webhook~~ | 所有執行失敗 | ✅ 已解決 (改用 Webhook) |
-| 回應時間 ~20秒 | 超過目標 <10秒 | ⏳ 待優化 |
-| 前端表單需獨立託管 | 無內建表單 UI | ⏳ 待部署 |
+| ~~Form Trigger 不支援 Respond to Webhook~~ | 所有執行失敗 | ✅ 已解決 |
+| ~~回應時間 ~20秒~~ | 超過目標 | ✅ 已接受 (AI 需時間) |
+| ~~前端表單需獨立託管~~ | 無內建表單 UI | ✅ GitHub Pages |
 
 ## Recent Decisions
 
 | 日期 | 決策 | 原因 |
 |------|------|------|
+| 2026-01-20 | 支援 Undergrad + Graduate | 擴大目標用戶群 |
+| 2026-01-20 | GPA 自動轉換 | 支援多種計分制度 |
+| 2026-01-20 | 多檔案成績單上傳 | 節省用戶作業時間 |
+| 2026-01-20 | 多語言支援 | 預期有英文用戶 |
 | 2026-01-17 | 改用 Webhook Trigger | n8n Form Trigger 不支援 Respond to Webhook |
 | 2026-01-17 | 建立獨立前端表單 | 保留完整 HTML 結果頁功能 |
 | 2026-01-16 | MVP 聚焦選校建議 | 顧問團隊回饋這是最高頻問題 |
-| 2026-01-16 | 使用 n8n + Claude API | 現有技術資源，快速迭代 |
 
 ## Milestones
 
@@ -112,9 +130,11 @@ author: Claude Code PM System
 | MVP 開發 | ✅ | Workflows 完成 |
 | 部署完成 | ✅ | 已匯入 n8n |
 | 架構修正 | ✅ | Form→Webhook 重構完成 |
-| 測試驗證 | ⏳ | Webhook 測試通過，完整測試待執行 |
-| MVP 上線 | ⏳ | 目標：30 天內 100+ 預約 |
+| 測試驗證 | ✅ | 全流程測試通過 |
+| MVP 上線 | ✅ | GitHub Pages 已部署 |
+| **Phase 2 規劃** | ⏳ | 成績單上傳、多語言、GPA轉換 |
 
 ## Update History
+- 2026-01-20T12:18:01Z: MVP 完成！新增 Email/Airtable 整合、GitHub Pages 部署、Phase 2 規劃
 - 2026-01-17T13:14:17Z: 完成架構重構 (Form→Webhook)，建立前端表單，更新文件
 - 2026-01-16T16:52:48Z: 完成 Case 1 測試，發現效能問題 (19.7s)

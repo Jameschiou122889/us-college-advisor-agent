@@ -1,7 +1,7 @@
 ---
 created: 2026-01-16T04:49:40Z
-last_updated: 2026-01-16T04:49:40Z
-version: 1.0
+last_updated: 2026-01-20T12:18:01Z
+version: 1.1
 author: Claude Code PM System
 ---
 
@@ -13,13 +13,19 @@ author: Claude Code PM System
 
 ## Target Users
 
-### Primary: 高中生 (14-18 歲)
+### Primary: 高中生 (Undergraduate 申請者)
 - **特徵**: 正在準備或考慮申請美國大學
 - **痛點**: 不知道自己的條件適合哪些學校
 - **目標**: 快速獲得個人化選校建議
 - **使用情境**: 課後/週末，獨立或與家長一起使用
 
-### Secondary: 家長
+### Secondary: 大學生 (Graduate 申請者) 【Phase 2 新增】
+- **特徵**: 準備申請美國研究所 (Master/PhD)
+- **痛點**: 研究所選校考量因素不同
+- **目標**: 了解適合的研究所和錄取機會
+- **使用情境**: 大三/大四，規劃留學
+
+### Tertiary: 家長
 - **特徵**: 子女準備申請美國大學的家長
 - **痛點**: 對美國大學系統不熟悉，擔心選錯學校
 - **目標**: 了解可行選項和預算範圍
@@ -43,12 +49,12 @@ author: Claude Code PM System
 期望: 清楚的學費資訊和專業顧問諮詢
 ```
 
-## Core Features (MVP)
+## Core Features (MVP) ✅
 
 ### 1. 學生資料輸入
 - 彈性表單：必填 + 選填欄位
 - 支援「尚未考試」選項
-- GPA 格式自動轉換
+- Email 欄位收集
 
 ### 2. AI 選校推薦
 - 分層推薦：衝刺校/適中校/安全校
@@ -56,14 +62,32 @@ author: Claude Code PM System
 - 考慮科系競爭度
 
 ### 3. 結果展示
-- 15 所推薦學校
+- 10 所推薦學校 (Reach 3 / Match 3 / Safety 4)
 - 每校顯示排名、學費、熱門科系
 - 響應式設計
+- **Email 寄送推薦報告** ✅
 
 ### 4. 顧問轉化
 - 結果頁 CTA
-- 預約表單
+- 預約表單 (自動帶入 Email)
 - 聯絡資訊收集
+- **Airtable 儲存** ✅
+
+## Phase 2 Features (規劃中)
+
+### 5. 成績單上傳
+- 多檔案上傳支援 (PDF/JPG/PNG)
+- OCR 自動解析
+- 自動填入 GPA/SAT/課程
+
+### 6. 進階欄位
+- 申請層級 (Undergraduate/Graduate)
+- GPA 多制度轉換 (4.0/4.3/5.0/百分制)
+- 修課紀錄 (AP/IB/榮譽課程)
+
+### 7. 多語言支援
+- 中文/英文切換
+- AI 分析結果多語言輸出
 
 ## Use Cases
 

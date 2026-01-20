@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>美國大學選校推薦 | AI 顧問</title>
+    <title>US College Recommendation | AI Advisor</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -13,7 +13,7 @@
             padding: 20px;
         }
         .container {
-            max-width: 600px;
+            max-width: 650px;
             margin: 0 auto;
         }
         .card {
@@ -21,6 +21,24 @@
             border-radius: 16px;
             padding: 40px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        .lang-switcher {
+            text-align: right;
+            margin-bottom: 15px;
+        }
+        .lang-btn {
+            background: none;
+            border: 1px solid #667eea;
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #667eea;
+            transition: all 0.3s;
+        }
+        .lang-btn:hover, .lang-btn.active {
+            background: #667eea;
+            color: white;
         }
         h1 {
             color: #2c3e50;
@@ -58,6 +76,10 @@
             outline: none;
             border-color: #667eea;
         }
+        input[type="file"] {
+            padding: 10px;
+            background: #f8f9fa;
+        }
         textarea {
             resize: vertical;
             min-height: 80px;
@@ -67,7 +89,7 @@
             font-size: 12px;
             margin-top: 4px;
         }
-        button {
+        button[type="submit"] {
             width: 100%;
             padding: 16px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -79,11 +101,11 @@
             cursor: pointer;
             transition: transform 0.3s, box-shadow 0.3s;
         }
-        button:hover {
+        button[type="submit"]:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
         }
-        button:disabled {
+        button[type="submit"]:disabled {
             opacity: 0.7;
             cursor: not-allowed;
             transform: none;
@@ -121,8 +143,41 @@
             grid-template-columns: 1fr 1fr;
             gap: 15px;
         }
-        @media (max-width: 500px) {
-            .row { grid-template-columns: 1fr; }
+        .row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+        }
+        .file-list {
+            margin-top: 8px;
+            font-size: 13px;
+            color: #666;
+        }
+        .file-item {
+            padding: 4px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .parse-status {
+            margin-top: 10px;
+            padding: 10px;
+            background: #e8f4fd;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+        }
+        .parse-status.active {
+            display: block;
+        }
+        .section-title {
+            font-size: 14px;
+            color: #667eea;
+            font-weight: 600;
+            margin: 25px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #667eea;
+        }
+        @media (max-width: 600px) {
+            .row, .row-3 { grid-template-columns: 1fr; }
             .card { padding: 25px; }
         }
     </style>
@@ -130,124 +185,383 @@
 <body>
     <div class="container">
         <div class="card">
-            <h1>🎓 美國大學選校推薦</h1>
-            <p class="subtitle">填寫您的資料，AI 顧問為您分析最適合的大學</p>
+            <div class="lang-switcher">
+                <button class="lang-btn active" onclick="setLang('zh')">中文</button>
+                <button class="lang-btn" onclick="setLang('en')">English</button>
+            </div>
+
+            <h1 id="title"></h1>
+            <p class="subtitle" id="subtitle"></p>
 
             <div class="error" id="error"></div>
 
             <form id="advisorForm">
                 <div class="form-group">
-                    <label class="required">Email（選校報告將寄送至此信箱）</label>
-                    <input type="email" id="email" required placeholder="example@email.com">
+                    <label class="required" data-i18n="email"></label>
+                    <input type="email" id="email" required data-i18n-placeholder="emailPlaceholder">
                 </div>
 
-                <div class="row">
+                <div class="form-group">
+                    <label data-i18n="uploadTranscript"></label>
+                    <input type="file" id="transcripts" accept=".pdf,.jpg,.jpeg,.png" multiple>
+                    <p class="hint" data-i18n="uploadHint"></p>
+                    <div class="file-list" id="fileList"></div>
+                    <div class="parse-status" id="parseStatus"></div>
+                </div>
+
+                <div class="section-title" data-i18n="basicInfo"></div>
+
+                <div class="form-group">
+                    <label class="required" data-i18n="level"></label>
+                    <select id="level" required>
+                        <option value="" data-i18n-option="selectPlaceholder"></option>
+                        <option value="undergraduate" data-i18n-option="undergraduate"></option>
+                        <option value="graduate" data-i18n-option="graduate"></option>
+                    </select>
+                </div>
+
+                <div class="row-3">
                     <div class="form-group">
-                        <label class="required">GPA (滿分 4.0)</label>
-                        <input type="number" id="gpa" step="0.01" min="0" max="4" required placeholder="例如：3.7">
+                        <label class="required" data-i18n="gpa"></label>
+                        <input type="number" id="gpa" step="0.01" min="0" required data-i18n-placeholder="gpaPlaceholder">
                     </div>
                     <div class="form-group">
-                        <label class="required">目標科系</label>
+                        <label class="required" data-i18n="gpaScale"></label>
+                        <select id="gpaScale" required>
+                            <option value="4.0" data-i18n-option="scale40"></option>
+                            <option value="4.3" data-i18n-option="scale43"></option>
+                            <option value="5.0" data-i18n-option="scale50"></option>
+                            <option value="100" data-i18n-option="scale100"></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="required" data-i18n="major"></label>
                         <select id="major" required>
-                            <option value="">請選擇...</option>
-                            <option value="computer-science">電腦科學 Computer Science</option>
-                            <option value="engineering">工程 Engineering</option>
-                            <option value="electrical-engineering">電機工程 Electrical Engineering</option>
-                            <option value="mechanical-engineering">機械工程 Mechanical Engineering</option>
-                            <option value="data-science">資料科學 Data Science</option>
-                            <option value="economics">經濟學 Economics</option>
-                            <option value="business">企業管理 Business</option>
-                            <option value="finance">金融 Finance</option>
-                            <option value="psychology">心理學 Psychology</option>
-                            <option value="biology">生物 Biology</option>
-                            <option value="pre-med">醫學預科 Pre-Medicine</option>
-                            <option value="undecided">未決定 Undecided</option>
+                            <option value="" data-i18n-option="selectPlaceholder"></option>
+                            <option value="computer-science">Computer Science</option>
+                            <option value="engineering">Engineering</option>
+                            <option value="electrical-engineering">Electrical Engineering</option>
+                            <option value="mechanical-engineering">Mechanical Engineering</option>
+                            <option value="data-science">Data Science</option>
+                            <option value="economics">Economics</option>
+                            <option value="business">Business</option>
+                            <option value="finance">Finance</option>
+                            <option value="psychology">Psychology</option>
+                            <option value="biology">Biology</option>
+                            <option value="pre-med">Pre-Medicine</option>
+                            <option value="undecided">Undecided</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="row">
                     <div class="form-group">
-                        <label>SAT 分數</label>
-                        <input type="number" id="sat" min="400" max="1600" placeholder="例如：1450">
-                        <p class="hint">如未考可留空</p>
+                        <label data-i18n="sat"></label>
+                        <input type="number" id="sat" min="400" max="1600" data-i18n-placeholder="satPlaceholder">
+                        <p class="hint" data-i18n="optionalHint"></p>
                     </div>
                     <div class="form-group">
-                        <label>TOEFL 分數</label>
-                        <input type="number" id="toefl" min="0" max="120" placeholder="例如：105">
-                        <p class="hint">如未考可留空</p>
+                        <label data-i18n="toefl"></label>
+                        <input type="number" id="toefl" min="0" max="120" data-i18n-placeholder="toeflPlaceholder">
+                        <p class="hint" data-i18n="optionalHint"></p>
                     </div>
                 </div>
 
+                <div class="section-title" data-i18n="preferences"></div>
+
                 <div class="row">
                     <div class="form-group">
-                        <label>地區偏好</label>
+                        <label data-i18n="region"></label>
                         <select id="region">
-                            <option value="all">不限地區</option>
-                            <option value="East">東岸 (紐約、波士頓等)</option>
-                            <option value="West">西岸 (加州等)</option>
-                            <option value="South">南部 (德州、佛州等)</option>
-                            <option value="Midwest">中西部 (芝加哥等)</option>
+                            <option value="all" data-i18n-option="anyRegion"></option>
+                            <option value="East" data-i18n-option="eastCoast"></option>
+                            <option value="West" data-i18n-option="westCoast"></option>
+                            <option value="South" data-i18n-option="south"></option>
+                            <option value="Midwest" data-i18n-option="midwest"></option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>年學費預算 (美元)</label>
+                        <label data-i18n="budget"></label>
                         <select id="budget">
-                            <option value="any">不限預算</option>
-                            <option value="under-40k">$40,000 以下</option>
+                            <option value="any" data-i18n-option="anyBudget"></option>
+                            <option value="under-40k">< $40,000</option>
                             <option value="40k-55k">$40,000 - $55,000</option>
                             <option value="55k-65k">$55,000 - $65,000</option>
-                            <option value="over-65k">$65,000 以上</option>
+                            <option value="over-65k">> $65,000</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>課外活動或特殊經歷</label>
-                    <textarea id="activities" placeholder="例如：社團幹部、競賽獲獎、志工經驗等"></textarea>
+                    <label data-i18n="courses"></label>
+                    <textarea id="courses" data-i18n-placeholder="coursesPlaceholder"></textarea>
+                    <p class="hint" data-i18n="coursesHint"></p>
                 </div>
 
-                <button type="submit" id="submitBtn">🔍 取得選校推薦</button>
+                <div class="form-group">
+                    <label data-i18n="activities"></label>
+                    <textarea id="activities" data-i18n-placeholder="activitiesPlaceholder"></textarea>
+                </div>
+
+                <button type="submit" id="submitBtn"></button>
             </form>
 
             <div class="loading" id="loading">
                 <div class="spinner"></div>
-                <p>AI 正在分析您的資料，請稍候...</p>
+                <p id="loadingText"></p>
             </div>
         </div>
     </div>
 
     <script>
         const WEBHOOK_URL = 'https://n8n-297809544822.us-west1.run.app/webhook/college-advisor';
+        const PARSE_URL = 'https://n8n-297809544822.us-west1.run.app/webhook/parse-transcript';
 
+        const i18n = {
+            zh: {
+                title: '美國大學選校推薦',
+                subtitle: '填寫您的資料，AI 顧問為您分析最適合的大學',
+                email: 'Email（選校報告將寄送至此信箱）',
+                emailPlaceholder: 'example@email.com',
+                uploadTranscript: '上傳成績單（可選，可多選）',
+                uploadHint: '支援 PDF、JPG、PNG，系統將自動解析填入',
+                basicInfo: '基本資料',
+                level: '申請層級',
+                selectPlaceholder: '請選擇...',
+                undergraduate: 'Undergraduate（大學部）',
+                graduate: 'Graduate（研究所）',
+                gpa: 'GPA',
+                gpaPlaceholder: '例如：3.7 或 85',
+                gpaScale: 'GPA 制度',
+                scale40: '4.0 制（美國標準）',
+                scale43: '4.3 制（含 A+）',
+                scale50: '5.0 制',
+                scale100: '百分制（0-100）',
+                major: '目標科系',
+                sat: 'SAT 分數',
+                satPlaceholder: '例如：1450',
+                toefl: 'TOEFL 分數',
+                toeflPlaceholder: '例如：105',
+                optionalHint: '如未考可留空',
+                preferences: '偏好設定',
+                region: '地區偏好',
+                anyRegion: '不限地區',
+                eastCoast: '東岸 (紐約、波士頓等)',
+                westCoast: '西岸 (加州等)',
+                south: '南部 (德州、佛州等)',
+                midwest: '中西部 (芝加哥等)',
+                budget: '年學費預算 (美元)',
+                anyBudget: '不限預算',
+                courses: '修課紀錄',
+                coursesPlaceholder: '例如：AP Calculus BC、AP Physics C、IB Economics HL',
+                coursesHint: 'AP/IB/榮譽課程對申請有加分效果',
+                activities: '課外活動或特殊經歷',
+                activitiesPlaceholder: '例如：社團幹部、競賽獲獎、志工經驗等',
+                submit: '取得選校推薦',
+                loading: 'AI 正在分析您的資料，請稍候...',
+                parsing: '解析中',
+                parseComplete: '解析完成',
+                errorGpa: 'GPA 數值超出範圍',
+                errorGeneral: '發生錯誤，請稍後再試'
+            },
+            en: {
+                title: 'US College Recommendation',
+                subtitle: 'Fill in your info, AI advisor will analyze the best colleges for you',
+                email: 'Email (Report will be sent here)',
+                emailPlaceholder: 'example@email.com',
+                uploadTranscript: 'Upload Transcript (Optional, Multiple)',
+                uploadHint: 'Supports PDF, JPG, PNG. Auto-fill from parsed data.',
+                basicInfo: 'Basic Information',
+                level: 'Application Level',
+                selectPlaceholder: 'Select...',
+                undergraduate: 'Undergraduate',
+                graduate: 'Graduate (Master/PhD)',
+                gpa: 'GPA',
+                gpaPlaceholder: 'e.g., 3.7 or 85',
+                gpaScale: 'GPA Scale',
+                scale40: '4.0 Scale (US Standard)',
+                scale43: '4.3 Scale (with A+)',
+                scale50: '5.0 Scale',
+                scale100: 'Percentage (0-100)',
+                major: 'Intended Major',
+                sat: 'SAT Score',
+                satPlaceholder: 'e.g., 1450',
+                toefl: 'TOEFL Score',
+                toeflPlaceholder: 'e.g., 105',
+                optionalHint: 'Leave blank if not taken',
+                preferences: 'Preferences',
+                region: 'Region Preference',
+                anyRegion: 'Any Region',
+                eastCoast: 'East Coast (NY, Boston, etc.)',
+                westCoast: 'West Coast (California, etc.)',
+                south: 'South (Texas, Florida, etc.)',
+                midwest: 'Midwest (Chicago, etc.)',
+                budget: 'Annual Tuition Budget (USD)',
+                anyBudget: 'No Budget Limit',
+                courses: 'Course History',
+                coursesPlaceholder: 'e.g., AP Calculus BC, AP Physics C, IB Economics HL',
+                coursesHint: 'AP/IB/Honors courses strengthen your application',
+                activities: 'Extracurricular Activities',
+                activitiesPlaceholder: 'e.g., Club leadership, competition awards, volunteer work',
+                submit: 'Get Recommendations',
+                loading: 'AI is analyzing your data, please wait...',
+                parsing: 'Parsing',
+                parseComplete: 'Parse complete',
+                errorGpa: 'GPA value out of range',
+                errorGeneral: 'An error occurred. Please try again later.'
+            }
+        };
+
+        let currentLang = localStorage.getItem('lang') || (navigator.language.startsWith('zh') ? 'zh' : 'en');
+
+        function setLang(lang) {
+            currentLang = lang;
+            localStorage.setItem('lang', lang);
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent.includes(lang === 'zh' ? '中文' : 'English'));
+            });
+            applyTranslations();
+        }
+
+        function applyTranslations() {
+            const t = i18n[currentLang];
+            document.getElementById('title').textContent = t.title;
+            document.getElementById('subtitle').textContent = t.subtitle;
+            document.getElementById('submitBtn').textContent = t.submit;
+            document.getElementById('loadingText').textContent = t.loading;
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (t[key]) el.textContent = t[key];
+            });
+
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (t[key]) el.placeholder = t[key];
+            });
+
+            document.querySelectorAll('[data-i18n-option]').forEach(el => {
+                const key = el.getAttribute('data-i18n-option');
+                if (t[key]) el.textContent = t[key];
+            });
+        }
+
+        // File upload handling
+        document.getElementById('transcripts').addEventListener('change', async (e) => {
+            const files = e.target.files;
+            const fileList = document.getElementById('fileList');
+            const parseStatus = document.getElementById('parseStatus');
+            const t = i18n[currentLang];
+
+            if (files.length === 0) {
+                fileList.innerHTML = '';
+                parseStatus.classList.remove('active');
+                return;
+            }
+
+            fileList.innerHTML = Array.from(files).map(f =>
+                `<div class="file-item">${f.name} (${(f.size/1024).toFixed(1)} KB)</div>`
+            ).join('');
+
+            parseStatus.classList.add('active');
+            parseStatus.textContent = `${t.parsing} (0/${files.length})...`;
+
+            let results = [];
+            for (let i = 0; i < files.length; i++) {
+                parseStatus.textContent = `${t.parsing} (${i+1}/${files.length})...`;
+                try {
+                    const formData = new FormData();
+                    formData.append('file', files[i]);
+                    const resp = await fetch(PARSE_URL, { method: 'POST', body: formData });
+                    if (resp.ok) {
+                        const data = await resp.json();
+                        results.push(data);
+                    }
+                } catch (err) {
+                    console.error('Parse error:', err);
+                }
+            }
+
+            // Merge results
+            if (results.length > 0) {
+                const merged = {
+                    gpa: Math.max(...results.map(r => r.gpa).filter(v => v != null), 0) || null,
+                    sat: Math.max(...results.map(r => r.sat).filter(v => v != null), 0) || null,
+                    toefl: Math.max(...results.map(r => r.toefl).filter(v => v != null), 0) || null,
+                    courses: [...new Set(results.flatMap(r => r.courses ? r.courses.split(',').map(c => c.trim()) : []))].join(', ')
+                };
+
+                if (merged.gpa) document.getElementById('gpa').value = merged.gpa;
+                if (merged.sat) document.getElementById('sat').value = merged.sat;
+                if (merged.toefl) document.getElementById('toefl').value = merged.toefl;
+                if (merged.courses) document.getElementById('courses').value = merged.courses;
+
+                parseStatus.textContent = `${t.parseComplete}!`;
+            } else {
+                parseStatus.textContent = 'No data extracted';
+            }
+        });
+
+        // GPA conversion
+        function convertGpaTo4(gpa, scale) {
+            const gpaNum = parseFloat(gpa);
+            switch(scale) {
+                case '4.0': return gpaNum;
+                case '4.3': return gpaNum * (4.0 / 4.3);
+                case '5.0': return gpaNum * (4.0 / 5.0);
+                case '100': return (gpaNum - 50) / 12.5;
+                default: return gpaNum;
+            }
+        }
+
+        function getMaxGpaForScale(scale) {
+            switch(scale) {
+                case '4.0': return 4.0;
+                case '4.3': return 4.3;
+                case '5.0': return 5.0;
+                case '100': return 100;
+                default: return 4.0;
+            }
+        }
+
+        // Form submission
         document.getElementById('advisorForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const form = e.target;
-            const submitBtn = document.getElementById('submitBtn');
             const loading = document.getElementById('loading');
             const errorDiv = document.getElementById('error');
+            const t = i18n[currentLang];
 
-            // Validate GPA
-            const gpa = parseFloat(document.getElementById('gpa').value);
-            if (gpa < 0 || gpa > 4.0) {
-                errorDiv.textContent = 'GPA 必須在 0 到 4.0 之間';
+            const gpaRaw = parseFloat(document.getElementById('gpa').value);
+            const gpaScale = document.getElementById('gpaScale').value;
+            const maxGpa = getMaxGpaForScale(gpaScale);
+
+            if (gpaRaw < 0 || gpaRaw > maxGpa) {
+                errorDiv.textContent = t.errorGpa + ` (0-${maxGpa})`;
                 errorDiv.style.display = 'block';
                 return;
             }
+
+            const gpaConverted = convertGpaTo4(gpaRaw, gpaScale);
 
             errorDiv.style.display = 'none';
             form.style.display = 'none';
             loading.classList.add('active');
 
             const data = {
+                lang: currentLang,
                 email: document.getElementById('email').value,
-                gpa: gpa,
+                level: document.getElementById('level').value,
+                gpa: gpaRaw,
+                gpaScale: gpaScale,
+                gpaConverted: Math.round(gpaConverted * 100) / 100,
                 major: document.getElementById('major').value,
                 sat: document.getElementById('sat').value ? parseInt(document.getElementById('sat').value) : null,
                 toefl: document.getElementById('toefl').value ? parseInt(document.getElementById('toefl').value) : null,
                 region: document.getElementById('region').value,
                 budget: document.getElementById('budget').value,
+                courses: document.getElementById('courses').value,
                 activities: document.getElementById('activities').value
             };
 
@@ -258,7 +572,7 @@
                     body: JSON.stringify(data)
                 });
 
-                if (!response.ok) throw new Error('請求失敗');
+                if (!response.ok) throw new Error('Request failed');
 
                 const html = await response.text();
                 document.open();
@@ -267,10 +581,13 @@
             } catch (error) {
                 loading.classList.remove('active');
                 form.style.display = 'block';
-                errorDiv.textContent = '發生錯誤，請稍後再試';
+                errorDiv.textContent = t.errorGeneral;
                 errorDiv.style.display = 'block';
             }
         });
+
+        // Initialize
+        setLang(currentLang);
     </script>
 </body>
 </html>

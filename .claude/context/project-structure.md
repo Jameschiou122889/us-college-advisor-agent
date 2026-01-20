@@ -1,7 +1,7 @@
 ---
 created: 2026-01-16T04:49:40Z
-last_updated: 2026-01-17T13:14:17Z
-version: 1.1
+last_updated: 2026-01-20T12:18:01Z
+version: 1.2
 author: Claude Code PM System
 ---
 
@@ -12,16 +12,10 @@ author: Claude Code PM System
 ```
 us-college-advisor-agent/
 ├── .claude/
-│   └── context/              # 專案 context 文件
-│       ├── progress.md
-│       ├── project-structure.md
-│       ├── tech-context.md
-│       ├── system-patterns.md
-│       ├── product-context.md
-│       ├── project-brief.md
-│       ├── project-overview.md
-│       ├── project-vision.md
-│       └── project-style-guide.md
+│   ├── context/              # 專案 context 文件
+│   │   └── *.md
+│   └── plans/                # 實作計畫
+│       └── *.md
 │
 ├── data/                     # 資料檔案
 │   ├── schools.json          # 學校資料庫 (Top 50)
@@ -38,8 +32,12 @@ us-college-advisor-agent/
 ├── prompts/                  # Claude API Prompts
 │   └── recommendation-prompt.md
 │
-└── public/                   # 前端靜態檔案
-    └── index.html            # 學生資料表單
+├── public/                   # 前端靜態檔案
+│   ├── index.html            # 選校推薦表單
+│   └── booking.html          # 顧問預約表單
+│
+├── index.html                # GitHub Pages 入口 (同 public/)
+└── booking.html              # GitHub Pages 預約頁 (同 public/)
 ```
 
 ## Key Directories
@@ -51,8 +49,9 @@ us-college-advisor-agent/
 | `/data/` | 學校和科系資料 | ✅ 已完成 |
 | `/n8n/workflows/` | Workflow JSON | ✅ 已完成 |
 | `/prompts/` | Claude prompts | ✅ 已完成 |
-| `/public/` | 前端表單 | ✅ 已建立 (2026-01-17) |
+| `/public/` | 前端表單 | ✅ index.html + booking.html |
 | `/docs/` | 測試文件 | ✅ 已完成 |
+| `/` (根目錄) | GitHub Pages | ✅ 複製自 public/ |
 
 ## File Naming Conventions
 

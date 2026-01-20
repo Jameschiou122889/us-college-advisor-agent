@@ -1,7 +1,7 @@
 ---
 created: 2026-01-16T04:49:40Z
-last_updated: 2026-01-17T13:14:17Z
-version: 1.2
+last_updated: 2026-01-20T12:18:01Z
+version: 1.3
 author: Claude Code PM System
 ---
 
@@ -63,9 +63,27 @@ author: Claude Code PM System
 
 | 整合項目 | 用途 | 狀態 |
 |----------|------|------|
+| **Airtable** | 資料儲存 | ✅ 選校推薦 + 預約記錄 |
+| **Gmail** | Email 發送 | ✅ 推薦報告發送 |
+| **GitHub Pages** | 前端託管 | ✅ 已部署 |
 | Email (SMTP) | 顧問通知 | ✅ 已設定 |
 | 顧問 CRM | 預約管理 | Phase 2 |
 | LINE Bot | 通知/互動 | Phase 2 |
+
+### Airtable 設定
+
+| 項目 | 值 |
+|------|-----|
+| Base ID | `appGgw7TZ0D2IcU2s` |
+| 選校推薦紀錄 | `tbluHOpvcXxw72XaY` |
+| 預約諮詢 | `tblWg5DVxWhVm1eo7` |
+
+### Gmail 設定
+
+| 項目 | 值 |
+|------|-----|
+| Credential ID | `DrLHnjdMLy71E29h` |
+| 用途 | 發送選校推薦報告 |
 
 ## Development Tools
 
@@ -115,13 +133,23 @@ Headers: x-api-key, anthropic-version: 2023-06-01
 ### User Input Schema
 ```json
 {
+  "email": "student@example.com",
   "gpa": 3.7,
   "major": "computer-science",
   "sat": 1450,
   "toefl": 105,
-  "region_preference": ["West", "East"],
-  "budget": "50-70k",
+  "region": "West",
+  "budget": "40k-55k",
   "activities": "Robotics club, Math competition"
+}
+```
+
+### Phase 2 新增欄位 (規劃中)
+```json
+{
+  "level": "undergraduate|graduate",
+  "gpaScale": "4.0|4.3|5.0|100",
+  "courses": "AP Calculus, IB Physics..."
 }
 ```
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>預約升學顧問諮詢 | AI 顧問</title>
+    <title>Book Consultation | AI Advisor</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -21,6 +21,24 @@
             border-radius: 16px;
             padding: 40px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        .lang-switcher {
+            text-align: right;
+            margin-bottom: 15px;
+        }
+        .lang-btn {
+            background: none;
+            border: 1px solid #667eea;
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #667eea;
+            transition: all 0.3s;
+        }
+        .lang-btn:hover, .lang-btn.active {
+            background: #667eea;
+            color: white;
         }
         h1 {
             color: #2c3e50;
@@ -136,79 +154,168 @@
 <body>
     <div class="container">
         <div class="card">
-            <h1>📅 預約升學顧問諮詢</h1>
-            <p class="subtitle">填寫以下資料，我們的顧問將盡快與您聯繫</p>
+            <div class="lang-switcher">
+                <button class="lang-btn active" onclick="setLang('zh')">中文</button>
+                <button class="lang-btn" onclick="setLang('en')">English</button>
+            </div>
+
+            <h1 id="title"></h1>
+            <p class="subtitle" id="subtitle"></p>
 
             <div class="error" id="error"></div>
 
             <form id="bookingForm">
                 <div class="form-group">
-                    <label class="required">姓名</label>
-                    <input type="text" id="name" required placeholder="請輸入您的姓名">
+                    <label class="required" data-i18n="name"></label>
+                    <input type="text" id="name" required data-i18n-placeholder="namePlaceholder">
                 </div>
 
                 <div class="form-group">
-                    <label class="required">聯絡電話或 LINE ID</label>
-                    <input type="text" id="contact" required placeholder="例如：0912-345-678 或 LINE ID">
+                    <label class="required" data-i18n="contact"></label>
+                    <input type="text" id="contact" required data-i18n-placeholder="contactPlaceholder">
                 </div>
 
                 <div class="form-group">
-                    <label class="required">Email</label>
+                    <label class="required" data-i18n="email"></label>
                     <input type="email" id="email" required placeholder="example@email.com">
                 </div>
 
                 <div class="form-group">
-                    <label>期望諮詢時間</label>
+                    <label data-i18n="preferredTime"></label>
                     <select id="preferredTime">
-                        <option value="皆可，由顧問安排">皆可，由顧問安排</option>
-                        <option value="平日上午 (9:00-12:00)">平日上午 (9:00-12:00)</option>
-                        <option value="平日下午 (14:00-18:00)">平日下午 (14:00-18:00)</option>
-                        <option value="平日晚上 (19:00-21:00)">平日晚上 (19:00-21:00)</option>
-                        <option value="週末上午 (9:00-12:00)">週末上午 (9:00-12:00)</option>
-                        <option value="週末下午 (14:00-18:00)">週末下午 (14:00-18:00)</option>
+                        <option value="any" data-i18n-option="anyTime"></option>
+                        <option value="weekday-morning" data-i18n-option="weekdayMorning"></option>
+                        <option value="weekday-afternoon" data-i18n-option="weekdayAfternoon"></option>
+                        <option value="weekday-evening" data-i18n-option="weekdayEvening"></option>
+                        <option value="weekend-morning" data-i18n-option="weekendMorning"></option>
+                        <option value="weekend-afternoon" data-i18n-option="weekendAfternoon"></option>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <label>備註</label>
-                    <textarea id="notes" placeholder="如有特別想詢問的問題，請在此說明"></textarea>
+                    <label data-i18n="notes"></label>
+                    <textarea id="notes" data-i18n-placeholder="notesPlaceholder"></textarea>
                 </div>
 
-                <button type="submit" id="submitBtn">送出預約</button>
+                <button type="submit" id="submitBtn"></button>
             </form>
 
             <div class="loading" id="loading">
                 <div class="spinner"></div>
-                <p>正在送出預約...</p>
+                <p id="loadingText"></p>
             </div>
 
-            <a href="index.html" class="back-link">← 返回選校推薦</a>
+            <a href="index.html" class="back-link" id="backLink"></a>
         </div>
     </div>
 
     <script>
         const WEBHOOK_URL = 'https://n8n-297809544822.us-west1.run.app/webhook/booking';
 
-        // 從 URL 參數讀取 email 並自動填入
+        const i18n = {
+            zh: {
+                title: '預約升學顧問諮詢',
+                subtitle: '填寫以下資料，我們的顧問將盡快與您聯繫',
+                name: '姓名',
+                namePlaceholder: '請輸入您的姓名',
+                contact: '聯絡電話或 LINE ID',
+                contactPlaceholder: '例如：0912-345-678 或 LINE ID',
+                email: 'Email',
+                preferredTime: '期望諮詢時間',
+                anyTime: '皆可，由顧問安排',
+                weekdayMorning: '平日上午 (9:00-12:00)',
+                weekdayAfternoon: '平日下午 (14:00-18:00)',
+                weekdayEvening: '平日晚上 (19:00-21:00)',
+                weekendMorning: '週末上午 (9:00-12:00)',
+                weekendAfternoon: '週末下午 (14:00-18:00)',
+                notes: '備註',
+                notesPlaceholder: '如有特別想詢問的問題，請在此說明',
+                submit: '送出預約',
+                loading: '正在送出預約...',
+                backLink: '← 返回選校推薦',
+                errorGeneral: '發生錯誤，請稍後再試'
+            },
+            en: {
+                title: 'Book Consultation',
+                subtitle: 'Fill in your info and our advisor will contact you soon',
+                name: 'Name',
+                namePlaceholder: 'Enter your name',
+                contact: 'Phone or LINE ID',
+                contactPlaceholder: 'e.g., +886-912-345-678 or LINE ID',
+                email: 'Email',
+                preferredTime: 'Preferred Time',
+                anyTime: 'Flexible, advisor will arrange',
+                weekdayMorning: 'Weekday Morning (9:00-12:00)',
+                weekdayAfternoon: 'Weekday Afternoon (14:00-18:00)',
+                weekdayEvening: 'Weekday Evening (19:00-21:00)',
+                weekendMorning: 'Weekend Morning (9:00-12:00)',
+                weekendAfternoon: 'Weekend Afternoon (14:00-18:00)',
+                notes: 'Notes',
+                notesPlaceholder: 'Any specific questions you want to ask',
+                submit: 'Submit Booking',
+                loading: 'Submitting...',
+                backLink: '← Back to Recommendations',
+                errorGeneral: 'An error occurred. Please try again later.'
+            }
+        };
+
+        // Get language from URL or localStorage
         const urlParams = new URLSearchParams(window.location.search);
+        let currentLang = urlParams.get('lang') || localStorage.getItem('lang') || (navigator.language.startsWith('zh') ? 'zh' : 'en');
+
+        // Auto-fill email from URL
         const emailFromUrl = urlParams.get('email');
         if (emailFromUrl) {
             document.getElementById('email').value = decodeURIComponent(emailFromUrl);
+        }
+
+        function setLang(lang) {
+            currentLang = lang;
+            localStorage.setItem('lang', lang);
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent.includes(lang === 'zh' ? '中文' : 'English'));
+            });
+            applyTranslations();
+        }
+
+        function applyTranslations() {
+            const t = i18n[currentLang];
+            document.getElementById('title').textContent = t.title;
+            document.getElementById('subtitle').textContent = t.subtitle;
+            document.getElementById('submitBtn').textContent = t.submit;
+            document.getElementById('loadingText').textContent = t.loading;
+            document.getElementById('backLink').textContent = t.backLink;
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (t[key]) el.textContent = t[key];
+            });
+
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (t[key]) el.placeholder = t[key];
+            });
+
+            document.querySelectorAll('[data-i18n-option]').forEach(el => {
+                const key = el.getAttribute('data-i18n-option');
+                if (t[key]) el.textContent = t[key];
+            });
         }
 
         document.getElementById('bookingForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const form = e.target;
-            const submitBtn = document.getElementById('submitBtn');
             const loading = document.getElementById('loading');
             const errorDiv = document.getElementById('error');
+            const t = i18n[currentLang];
 
             errorDiv.style.display = 'none';
             form.style.display = 'none';
             loading.classList.add('active');
 
             const data = {
+                lang: currentLang,
                 name: document.getElementById('name').value,
                 contact: document.getElementById('contact').value,
                 email: document.getElementById('email').value,
@@ -223,7 +330,7 @@
                     body: JSON.stringify(data)
                 });
 
-                if (!response.ok) throw new Error('請求失敗');
+                if (!response.ok) throw new Error('Request failed');
 
                 const html = await response.text();
                 document.open();
@@ -232,10 +339,13 @@
             } catch (error) {
                 loading.classList.remove('active');
                 form.style.display = 'block';
-                errorDiv.textContent = '發生錯誤，請稍後再試';
+                errorDiv.textContent = t.errorGeneral;
                 errorDiv.style.display = 'block';
             }
         });
+
+        // Initialize
+        setLang(currentLang);
     </script>
 </body>
 </html>
