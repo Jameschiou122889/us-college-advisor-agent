@@ -189,6 +189,13 @@
     <script>
         const WEBHOOK_URL = 'https://n8n-297809544822.us-west1.run.app/webhook/booking';
 
+        // 從 URL 參數讀取 email 並自動填入
+        const urlParams = new URLSearchParams(window.location.search);
+        const emailFromUrl = urlParams.get('email');
+        if (emailFromUrl) {
+            document.getElementById('email').value = decodeURIComponent(emailFromUrl);
+        }
+
         document.getElementById('bookingForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 

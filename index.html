@@ -136,6 +136,11 @@
             <div class="error" id="error"></div>
 
             <form id="advisorForm">
+                <div class="form-group">
+                    <label class="required">Email（選校報告將寄送至此信箱）</label>
+                    <input type="email" id="email" required placeholder="example@email.com">
+                </div>
+
                 <div class="row">
                     <div class="form-group">
                         <label class="required">GPA (滿分 4.0)</label>
@@ -236,6 +241,7 @@
             loading.classList.add('active');
 
             const data = {
+                email: document.getElementById('email').value,
                 gpa: gpa,
                 major: document.getElementById('major').value,
                 sat: document.getElementById('sat').value ? parseInt(document.getElementById('sat').value) : null,
